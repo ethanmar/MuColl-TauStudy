@@ -152,16 +152,17 @@ SIM.gun.energy = tauEnergy*GeV
 SIM.gun.isotrop = True
 SIM.gun.multiplicity = 1
 SIM.gun.particle = "tau-"
-SIM.gun.phiMax = None
 
-## Minimal azimuthal angle for random distribution
+## Azimuthal angle for random distribution
+SIM.gun.phiMax = None
 SIM.gun.phiMin = None
+
+# Polar angle for random distribution
+SIM.gun.thetaMax = 170*deg
+SIM.gun.thetaMin = 10*deg
 
 ##  position of the particle gun, 3 vector 
 SIM.gun.position = (0.0, 0.0, 0.0)
-SIM.gun.thetaMax = 172*deg
-SIM.gun.thetaMin = 8*deg
-
 
 ################################################################################
 ## Configuration for the output levels of DDG4 components 
@@ -188,8 +189,7 @@ SIM.output.random = 6
 SIM.part.keepAllParticles = False
 
 ## Minimal distance between particle vertex and endpoint of parent after
-##     which the vertexIsNotEndpointOfParent flag is set
-##     
+## which the vertexIsNotEndpointOfParent flag is set
 SIM.part.minDistToParentVertex = 2.2e-20
 
 ## MinimalKineticEnergy to store particles created in the tracking region
@@ -212,7 +212,6 @@ SIM.physics.decays = False
 SIM.physics.list = "QGSP_BERT"
 
 ##  location of particle.tbl file containing extra particles and their lifetime information
-##     
 SIM.physics.pdgfile = os.path.join( os.environ.get("DD4HEP"), "DDG4/examples/particle.tbl" )
 
 ##  The global geant4 rangecut for secondary production
