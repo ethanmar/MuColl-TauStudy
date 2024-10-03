@@ -5,23 +5,23 @@ from g4units import mm, GeV, MeV, m, deg
 from numpy import random
 SIM = DD4hepSimulation()
 
-## The compact XML file
-SIM.compactFile = "/opt/ilcsoft/muonc/detector-simulation/geometries/MuColl_v1/MuColl_v1.xml"
-## Lorentz boost for the crossing angle, in radian!
+## Path to the compact geometry description [XML file]
+SIM.compactFile = os.environ.get('MUCOLL_GEO')
+## Lorentz boost for the crossing angle [radian]
 SIM.crossingAngleBoost = 0.
 SIM.enableDetailedShowerMode = True
 SIM.enableG4GPS = False
 SIM.enableG4Gun = False
 SIM.enableGun = False
 ## InputFiles for simulation .stdhep, .slcio, .HEPEvt, .hepevt, .hepmc files are supported
-SIM.inputFiles = "LATEST.slcio" #generated from lcio_particle_gun.py
+SIM.inputFiles = "output_gen.slcio" #generated from lcio_tau_gun.py
 ## Macro file to execute for runType 'run' or 'vis'
 SIM.macroFile = []
 ## number of events to simulate, used in batch mode
 SIM.numberOfEvents = 100000
 ## Outputfile from the simulation,only lcio output is supported
-SIM.outputFile = "out.slcio"
-## Verbosity use integers from 1(most) to 7(least) verbose
+SIM.outputFile = "output_sim.slcio"
+## Verbosity use integers from 1 (most) to 7 (least) verbose
 ## or strings: VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS
 SIM.printLevel = 3
 ## The type of action to do in this invocation
@@ -126,7 +126,7 @@ SIM.filter.tracker = "edep1kev"
 ################################################################################
 
 ##  direction of the particle gun, 3 vector 
-# SIM.gun.direction = (0, 0, 1)
+SIM.gun.direction = (0, 0, 1)
 
 ## choose the distribution of the random direction for theta
 ## 
@@ -140,16 +140,15 @@ SIM.filter.tracker = "edep1kev"
 ##     Setting a distribution will set isotrop = True
 ##     
 SIM.gun.distribution = "uniform"
-en = random.rand(1,1)*195+5 ##draw random number on [0,1] and shift distro to [5,200]
-tauEn = en[0][0] ##fix format
-#print(tauEn)
-#SIM.gun.energy = tauEn*GeV
+tauEnergy = random.rand()*195+5 ## draw random number on [0,1] and shift to [5,200]
+SIM.gun.energy = tauEnergy*GeV
 
 ##  isotropic distribution for the particle gun
 ## 
 ##     use the options phiMin, phiMax, thetaMin, and thetaMax to limit the range of randomly distributed directions
 ##     if one of these options is not None the random distribution will be set to True and cannot be turned off!
 ##     
+
 SIM.gun.isotrop = True
 SIM.gun.multiplicity = 1
 SIM.gun.particle = "tau-"
