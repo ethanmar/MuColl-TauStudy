@@ -18,7 +18,7 @@ SIM.inputFiles = "output_gen.slcio" #generated from lcio_tau_gun.py
 ## Macro file to execute for runType 'run' or 'vis'
 SIM.macroFile = []
 ## number of events to simulate, used in batch mode
-SIM.numberOfEvents = 100000
+SIM.numberOfEvents = 10
 ## Outputfile from the simulation,only lcio output is supported
 SIM.outputFile = "output_sim.slcio"
 ## Verbosity use integers from 1 (most) to 7 (least) verbose
@@ -140,8 +140,8 @@ SIM.gun.direction = (0, 0, 1)
 ##     Setting a distribution will set isotrop = True
 ##     
 SIM.gun.distribution = "uniform"
-tauEnergy = random.rand()*195+5 ## draw random number on [0,1] and shift to [5,200]
-SIM.gun.energy = tauEnergy*GeV
+# tauEnergy = random.rand()*195+5 ## draw random number on [0,1] and shift to [5,200]
+SIM.gun.energy = 10*GeV # tauEnergy*GeV
 
 ##  isotropic distribution for the particle gun
 ## 
