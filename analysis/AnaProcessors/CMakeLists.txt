@@ -37,15 +37,7 @@ ENDIF()
 
 # Main library with Processors
 ADD_LIBRARY(AnaProcessors SHARED
-  ./src/RecoHistProcessor.cxx
-  ./src/GenHistProcessor.cxx
   ./src/BranchingProcessor.cxx
-  ./src/RecoPerformance.cxx
-  ./src/AnaDupe.cxx
-  ./src/AnaPFOs.cxx
-  ./src/CalAna.cxx
-  ./src/PiAna.cxx
-  ./src/EfficiencyProcessor.cxx
   )
 TARGET_INCLUDE_DIRECTORIES(AnaProcessors
   PUBLIC
