@@ -29,15 +29,6 @@ BranchingProcessor::BranchingProcessor()
    * - Find the branching rate for various decays of a simulated MC particle
    * - Stream out to a text file that can then be analyzed with a quick python "pdgreader"
    * - With a little modification, could use it for reco products as well
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
    *********************************************************/
 
   registerProcessorParameter("PDG",
@@ -77,7 +68,6 @@ void BranchingProcessor::processRunHeader( LCRunHeader* /*run*/) {
 }
 
 void BranchingProcessor::processEvent( LCEvent * evt ) {
-  //
   // Get object required collections and create lists
   // to keep track of unsaved objects.
   // Loop over MCParticles
@@ -91,16 +81,7 @@ void BranchingProcessor::processEvent( LCEvent * evt ) {
    *4: -211, -211, 16, 111, 211 (3-prong plus pi0 and nu-tau) (2.74%)
    *5: -211, 16, 111, 111, 111 (3 pi0, pi-, nu-tau) (1.04%)
    *6: -12, 11, 16 (nu-tau, e, nu-e-bar) (17.82%)
-   *7: -14, 13, 16 (nu-tau, e, nu-mu-bar) (17.39%)
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
+   *7: -14, 13, 16 (nu-tau, mu, nu-mu-bar) (17.39%)
    ********************************************************/
   
   LCCollection* inputCol = evt->getCollection(_inputCollectionName);
@@ -118,7 +99,7 @@ void BranchingProcessor::processEvent( LCEvent * evt ) {
   std::vector<int> pdglist={0};
 
   for(uint32_t i=0;i<nEl;i++) {
-    const EVENT::MCParticle *mcp=static_cast<const EVENT::MCParticle*>(inputCol->getElementAt(i));
+    const EVENT::MCParticle *mcp = static_cast<const EVENT::MCParticle*>(inputCol->getElementAt(i));
     
     //get pdgid, continue if not desired pdg
     double pdg = mcp->getPDG();
@@ -136,9 +117,6 @@ void BranchingProcessor::processEvent( LCEvent * evt ) {
     }
     std::sort(daughterpdgs.begin(), daughterpdgs.end());
     daughterpdgs.erase(std::remove(daughterpdgs.begin(), daughterpdgs.end(), 0), daughterpdgs.end());
-    for(int o=0; o<daughterpdgs.size(); o++){
-      //std::cout<<daughterpdgs[o]<<std::endl;
-    }
     if(daughterpdgs[0]==-211){
       //hadronic decays
       if(daughterpdgs[1]==-211){
@@ -183,13 +161,11 @@ void BranchingProcessor::processEvent( LCEvent * evt ) {
     
     //Get the parent ID
     
-    const EVENT::MCParticleVec parentvec = mcp -> getParents();
+    const EVENT::MCParticleVec parentvec = mcp->getParents();
     if(parentvec.size()==0){
       continue;
     }
     int parentID = parentvec.back()->getPDG();
-   
-    // std::cout<<parentID<<std::endl;
 
     //If not direct tau decay, skip
     if(parentID != 15){
@@ -199,6 +175,7 @@ void BranchingProcessor::processEvent( LCEvent * evt ) {
 
     //Fill charge
     int q = mcp->getCharge();
+	  
     _h_q->Fill(q);
     _h_MID->Fill(parentID);
     _h_pdg->Fill(pdg);
