@@ -13,7 +13,7 @@ from g4units import deg
 from pyLCIO import UTIL, EVENT, IMPL, IO, IOIMPL
 
 # Number of events per momentum bin
-nevt = 1000
+nevt = 100000
 
 # Output file
 outfile = "tau_gen.slcio"

@@ -6,39 +6,47 @@ from array import array
 import os
 import fnmatch
 
+# Command line arguments
 parser = ArgumentParser()
 
-parser.add_argument('-i-', '--inputFile', help='--inputFile output_digi_light.slcio', 
+# Input file
+parser.add_argument('-i-', '--inputFile', help='--inputFile output_reco.slcio', 
                   type=str, default='output_digi_light.slcio')
-parser.add_argument('-o', '--outputFile', help='--outputFile pdg_ana.root', 
-                  type=str, default='pdg_ana.root')
+
+# Output file
+parser.add_argument('-o', '--outputFile', help='--outputFile pi_ana.root', 
+                  type=str, default='pi_ana.root')
 args = parser.parse_args()
 
 hists = []
 
-hMC_Pdg = TH1F('MC_Pdg', 'MC_Pdg', 3000, 0, 3000)
-hists.append(hMC_Pdg)
-hPFO_Type = TH1F('PFO_type', 'PFO_type', 3000, 0, 3000)
-hists.append(hPFO_Type)
-hSel_PFO_Type = TH1F('Sel_PFO_type', 'Sel_PFO_type', 3000, 0, 3000)
-hists.append(hSel_PFO_Type)
-hN_MCPions = TH1F('N_MCPions', 'N_MCPions', 400, 0, 400)
-hists.append(hN_MCPions)
-hN_Pions = TH1F('N_Pions', 'N_Pions', 400, 0, 400)
-hists.append(hN_Pions)
-hN_Sel_Pions = TH1F('N_Sel_Pions', 'N_Sel_Pions', 400, 0, 400)
-hists.append(hN_Sel_Pions)
-hMC_Pt = TH1F('MC_Pt', 'MC_Pt', 1000, 0, 250)
-hists.append(hMC_Pt)
-hPFO_Pt = TH1F('PFO_Pt', 'PFO_Pt', 1000, 0, 250)
-hists.append(hPFO_Pt)
-hSel_PFO_Pt = TH1F('Sel_PFO_Pt', 'Sel_PFO_Pt', 1000, 0, 250)
-hists.append(hSel_PFO_Pt)
-
+# Initialize histograms
+fPDG = TH1F('pdg', 'MC Particle PDG', 1250, 0, 2500)
+hists.append(fPDG)
+fType = TH1F('type', 'Reco PFO Type', 1250, 0, 2500)
+hists.append(fType)
+fNMCPions = TH1F('n_mc_pions', 'Number of MC Pions', 400, 0, 400)
+hists.append(fNMCPions)
+fNRecoPions = TH1F('n_reco_pions', 'Number of Reco Pions', 400, 0, 400)
+hists.append(fNRecoPions)
+fMCPiPt = TH1F('mc_pi_pt', 'MC Pion Pt', 20, 0, 110)
+fMCPiPt.SetXTitle('Pt [GeV/c]')
+hists.append(fMCPiPt)
+fMCPi0Pt = TH1F('mc_pi0_pt', 'MC Neutral Pion Pt', 20, 0, 110)
+fMCPi0Pt.SetXTitle('Pt [GeV/c]')
+hists.append(fMCPi0Pt)
+fRecoPiPt = TH1F('reco_pi_pt', 'Reco Pion Pt', 20, 0, 110)
+fRecoPiPt.SetXTitle('Pt [GeV/c]')
+hists.append(fRecoPiPt)
+fRecoPi0Pt = TH1F('reco_pi0_pt', 'Reco Neutral Pion Pt', 20, 0, 110)
+fRecoPi0Pt.SetXTitle('Pt [GeV/c]')
+hists.append(fRecoPi0Pt)
 
 for hist in hists:
   hist.SetDirectory(0)
 
+pfoTypes = {}
+  
 to_process = []
 
 if os.path.isdir(args.inputFile):
@@ -48,74 +56,128 @@ if os.path.isdir(args.inputFile):
 else:
   to_process.append(args.inputFile)
 
-  
+# Open input file(s)
 for file in to_process:
   reader = IOIMPL.LCFactory.getInstance().createLCReader()
   reader.open(file)
+
+  # Loop through Events
   for ievt, event in enumerate(reader):
-    mc_pions = []
-    pfo_pions = []
-    sel_pfo_pions = []
+    # print('Entered event')
+    mc_pis = []
+    mc_pi0s = []
+    reco_pis = []
+    reco_pi0s = []
     
     mc_particles = event.getCollection('MCParticle')
+
+    # Loop through MCParticles
     for mc_particle in mc_particles:
-      mc_pdg = abs(mc_particle.getPDG())
+      #print('Entered MCParticle')
+      pdg = abs(mc_particle.getPDG())
+      parents = mc_particle.getParents()
+      if (len(parents) != 0):
+        motherID = parents[-1].getPDG()
+      else:
+        motherID = 0
 
-      if mc_pdg == 211:
-        mc_pions.append(mc_particle)
+      # Tag charged and neutral pions
+      if (pdg == 211 and motherID == 15):
+        mc_pis.append(mc_particle)
+      elif (pdg == 111 and motherID == 15):
+        mc_pi0s.append(mc_particle)
 
-      hMC_Pdg.Fill(mc_pdg)
+      # Fill PDG hist
+      fPDG.Fill(pdg)
 
-    hN_MCPions.Fill(len(mc_pions))
-      
-    for mc_pion in mc_pions:
-      mc_p = mc_pion.getMomentum()
-      mc_px = mc_p[0]
-      mc_py = mc_p[1]
-      mc_pt = math.sqrt(mc_px**2 + mc_py**2)
+    # Fill NPions hist
+    fNMCPions.Fill(len(mc_pis)+len(mc_pi0s))
 
-      hMC_Pt.Fill(mc_pt)
+    # Loop over charged pions
+    for mc_pi in mc_pis:
+      p = mc_pi.getMomentum()
+      px = p[0]
+      py = p[1]
+      pt = math.sqrt(px**2 + py**2)
+
+      # Fill MC charged pion pt hist
+      fMCPiPt.Fill(pt)
+
+    # Loop over neutral pions
+    for mc_pi0 in mc_pi0s:
+      p = mc_pi0.getMomentum()
+      px = p[0]
+      py = p[1]
+      pt = math.sqrt(px**2 + py**2)
+
+      # Fill MC neutral pion pt hist
+      fMCPi0Pt.Fill(pt)
 
     pfos = event.getCollection('PandoraPFOs')
+
+    # Loop over PFOs (reconstructed particles)
     for pfo in pfos:
-      pfo_type = abs(pfo.getType())
+      # print('Entered PFO')
+      _type = abs(pfo.getType())
 
-      if pfo_type == 211:
-        pfo_pions.append(pfo)
+      if str(_type) in pfoTypes:
+        pfoTypes[str(_type)] += 1
+      else:
+        pfoTypes[str(_type)] = 1
+      
+      # Tag charged and neutral pions
+      if _type == 211:
+        reco_pis.append(pfo)
+      elif _type == 111:
+        reco_pi0s.append(pfo)
 
-      hPFO_Type.Fill(pfo_type)
+      # Fill PFO type hist (reconstructed particle type)  
+      fType.Fill(_type)
 
-    hN_Pions.Fill(len(pfo_pions))
+    # Fill NPions hist  
+    fNRecoPions.Fill(len(reco_pis) + len(reco_pi0s))
 
-    for pfo_pion in pfo_pions:
-      pfo_p = pfo_pion.getMomentum()
-      pfo_px = pfo_p[0]
-      pfo_py = pfo_p[1]
-      pfo_pt = math.sqrt(pfo_px**2 + pfo_py**2)
+    # Loop over charged pions
+    for reco_pi in reco_pis:
+      p = reco_pi.getMomentum()
+      px = p[0]
+      py = p[1]
+      pt = math.sqrt(px**2 + py**2)
 
-      hPFO_Pt.Fill(pfo_pt)
+      # Fill reco charged pion pt hist
+      fRecoPiPt.Fill(pt)
 
-    sel_pfos = event.getCollection('SelectedPandoraPFOs')
-    for sel_pfo in sel_pfos:
-      sel_pfo_type = abs(sel_pfo.getType())
+    # Loop over neutral pions
+    for reco_pi0 in reco_pi0s:
+      p = reco_pi0.getMomentum()
+      px = p[0]
+      py = p[1]
+      pt = math.sqrt(px**2 + py**2)
 
-      if sel_pfo_type == 211:
-        sel_pfo_pions.append(sel_pfo)
-
-      hSel_PFO_Type.Fill(sel_pfo_type)
-
-    hN_Sel_Pions.Fill(len(sel_pfo_pions))
-
-    for sel_pfo_pion in sel_pfo_pions:
-      sel_pfo_p = sel_pfo_pion.getMomentum()
-      sel_pfo_px = sel_pfo_p[0]
-      sel_pfo_py = sel_pfo_p[1]
-      sel_pfo_pt = math.sqrt(sel_pfo_px**2 + sel_pfo_py**2)
-
-      hSel_PFO_Pt.Fill(sel_pfo_pt)
-
+      # Fill reco neutral pion pt hist
+      fRecoPi0Pt.Fill(pt)  
       
   reader.close()
+
+# Create charged pion pt efficiency hist
+fPiPtEff = fRecoPiPt.Clone('pi_eff')
+fPiPtEff.Divide(fPiPtEff, fMCPiPt, 1, 1, 'B')
+fPiPtEff.SetLineColor(6)
+fPiPtEff.SetLineWidth(2)
+fPiPtEff.SetTitle('Charged Pion Efficiency vs Pt')
+fPiPtEff.GetXaxis().SetTitle('pT [GeV/c]')
+fPiPtEff.GetYaxis().SetTitle("#epsilon")
+hists.append(fPiPtEff)
+
+# Create neutral pion pt efficiency hist
+fPi0PtEff = fRecoPi0Pt.Clone('pi0_eff')
+fPi0PtEff.Divide(fPi0PtEff, fMCPi0Pt, 1, 1, 'B')
+fPi0PtEff.SetLineColor(7)
+fPi0PtEff.SetLineWidth(2)
+fPi0PtEff.SetTitle('Neutral Pion Efficiency vs Pt')
+fPi0PtEff.GetXaxis().SetTitle('pT [GeV/c]')
+fPi0PtEff.GetYaxis().SetTitle('#epsilon')
+hists.append(fPi0PtEff)
 
 output_file = TFile(args.outputFile, 'RECREATE')
 for hist in hists:
@@ -129,5 +191,7 @@ for hist in hists:
   hist.Draw()
   canvas.SaveAs(filename)
 
-
-  
+with open('pfo_types.txt', 'w') as file:
+  file.write('PDG/Type of Reconstructed PFOs')
+  for key, value in pfoTypes.items():
+    print(f'PDG: {key}, Total Number: {value}', file=file)
