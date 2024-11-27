@@ -35,7 +35,7 @@
   <!--Calibration coefficients for ECAL-->
   <parameter name="CalibrECAL" type="FloatVec">35.8411424188 35.8411424188</parameter>
   <!--Threshold for ECAL Hits in GeV-->
-  <parameter name="ECALThreshold" type="float">0.002 </parameter>
+  <parameter name="ECALThreshold" type="float">5.e-5 </parameter>
   <!--Unit for ECAL Threshold. Can be "GeV", "MIP" or "px". MIP and px need properly set calibration constants-->
   <parameter name="ECALThresholdUnit" type="string">GeV </parameter>
   <!--Energy correction for ECAL endcap-->
@@ -117,7 +117,7 @@
   <!--Calibration coefficients for Other (Ring) HCAL-->
   <parameter name="CalibrHCALOther" type="FloatVec">62.2125698179</parameter>
   <!--Threshold for HCAL Hits in GeV-->
-  <parameter name="HCALThreshold" type="FloatVec">0.002 </parameter>
+  <parameter name="HCALThreshold" type="FloatVec">0.00025 </parameter>
   <!--Unit for HCAL Threshold. Can be "GeV", "MIP" or "px". MIP and px need properly set calibration constants-->
   <parameter name="HCALThresholdUnit" type="string">GeV </parameter>
   <!--Energy correction for HCAL endcap-->
