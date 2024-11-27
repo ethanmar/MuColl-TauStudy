@@ -22,11 +22,14 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--numberOfEvents", type=int, default=1000)
 # parser.add_argument("--gunEnergy", type = float)
+parser.add_argument("--charge", type=str)
 parser.add_argument("--output", type=str, default="piguns.slcio")
 args = parser.parse_args()
 
 # ---- number of events per momentum bin -----
 nevt = args.numberOfEvents
+
+charge_str = args.charge
 
 outfile = args.output
 
@@ -44,9 +47,13 @@ random.seed()
 energies = []
 
 genstat = 1 #change based on your configuration
-pdg = 211
 mass = 0.13957  # pion mass
-charge = +1
+if (charge_str.casefold() == "plus"):
+    pdg = 211
+    charge = +1
+elif (charge_str.casefold() == "minus"):
+    pdg = -211
+    charge = -1
 
 # decay time in seconds
 lifetime = 2.6033e-8 * s
