@@ -18,7 +18,7 @@ SIM.inputFiles = "output_gen.slcio" #generated from lcio_tau_gun.py
 ## Macro file to execute for runType 'run' or 'vis'
 SIM.macroFile = []
 ## number of events to simulate, used in batch mode
-SIM.numberOfEvents = 100000
+SIM.numberOfEvents = -1
 ## Outputfile from the simulation,only lcio output is supported
 SIM.outputFile = "output_sim.slcio"
 ## Verbosity use integers from 1 (most) to 7 (least) verbose
@@ -37,7 +37,7 @@ SIM.steeringFile = None
 ## FourVector of translation for the Smearing of the Vertex position: x y z t
 SIM.vertexOffset = [0.0, 0.0, 0.0, 0.0]
 ## FourVector of the Sigma for the Smearing of the Vertex position: x y z t
-SIM.vertexSigma = [0.0, 0.0, 0.0, 0.0]
+SIM.vertexSigma = [0.001 * mm, 0.001 * mm, 0.001 * mm, 0.001 * mm]
 
 
 ################################################################################
@@ -126,7 +126,7 @@ SIM.filter.tracker = "edep1kev"
 ################################################################################
 
 ##  direction of the particle gun, 3 vector 
-SIM.gun.direction = (0, 0, 1)
+# SIM.gun.direction = (0, 0, 1)
 
 ## choose the distribution of the random direction for theta
 ## 
@@ -139,9 +139,9 @@ SIM.gun.direction = (0, 0, 1)
 ## 
 ##     Setting a distribution will set isotrop = True
 ##     
-SIM.gun.distribution = "uniform"
+# SIM.gun.distribution = "uniform"
 # tauEnergy = random.rand()*195+5 ## draw random number on [0,1] and shift to [5,200]
-SIM.gun.energy = 10*GeV # tauEnergy*GeV
+# SIM.gun.energy = 10*GeV # tauEnergy*GeV
 
 ##  isotropic distribution for the particle gun
 ## 
@@ -149,20 +149,20 @@ SIM.gun.energy = 10*GeV # tauEnergy*GeV
 ##     if one of these options is not None the random distribution will be set to True and cannot be turned off!
 ##     
 
-SIM.gun.isotrop = True
-SIM.gun.multiplicity = 1
-SIM.gun.particle = "tau-"
+# SIM.gun.isotrop = True
+# SIM.gun.multiplicity = 1
+# SIM.gun.particle = "tau-"
 
 ## Azimuthal angle for random distribution
-SIM.gun.phiMax = None
-SIM.gun.phiMin = None
+# SIM.gun.phiMax = None
+# SIM.gun.phiMin = None
 
 # Polar angle for random distribution
-SIM.gun.thetaMax = 170*deg
-SIM.gun.thetaMin = 10*deg
+# SIM.gun.thetaMax = 170*deg
+# SIM.gun.thetaMin = 10*deg
 
 ##  position of the particle gun, 3 vector 
-SIM.gun.position = (0.0, 0.0, 0.0)
+# SIM.gun.position = (0.0, 0.0, 0.0)
 
 ################################################################################
 ## Configuration for the output levels of DDG4 components 
