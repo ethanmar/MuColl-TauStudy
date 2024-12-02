@@ -11,7 +11,7 @@ parser = ArgumentParser()
 
 # Input file
 parser.add_argument('-i-', '--inputFile', help='--inputFile output_reco.slcio', 
-                  type=str, default='output_digi_light.slcio')
+                  type=str, default='output_reco.slcio')
 
 # Output file
 parser.add_argument('-o', '--outputFile', help='--outputFile pi_ana.root', 

@@ -1,0 +1,135 @@
+from pyLCIO import IOIMPL, EVENT, UTIL
+from ROOT import TH1F, TFile, TCanvas
+import math
+from argparse import ArgumentParser
+from array import array 
+import os
+import fnmatch
+
+# Command line arguments
+parser = ArgumentParser()
+
+# Input file 
+parser.add_argument('-i', '--inputFile', help='--inputFile output_reco.slcio', 
+                    type=str, default='output_reco.slcio')
+
+# Output file
+parser.add_argument('-o', '--outputFile', help='--outputFile cluster_ana.root',
+                    type=str, default='cluster_ana.root')
+
+args = parser.parse_args()
+
+hists = []
+
+# Initialize histograms
+fClusterID = TH1F('cluster_id', 'Cluster Particle ID', 1250, 0, 2500)
+hists.append(fClusterID)
+
+# Neutral pion cluster histograms
+fPi0Energy = TH1F('pi0_energy', 'Pi0 Cluster Energy', 100, 0, 100)
+hists.append(fPi0Energy)
+fPi0Phi = TH1F('pi0_phi', 'Pi0 Cluster Phi', 180, 0, 360)
+hists.append(fPi0Phi)
+fPi0Theta = TH1F('pi0_theta', 'Pi0 Cluster Theta', 180, 0, 360)
+hists.append(fPi0Theta)
+fPi0NHits = TH1F('pi0_nHits', 'Pi0 Cluster Number of Calo Hits', 50, 0, 50)
+hists.append(fPi0NHits)
+
+# Photon cluster histograms
+fPhotonEnergy = TH1F('photon_energy', 'Photon Cluster Energy', 100, 0, 100)
+hists.append(fPhotonEnergy)
+fPhotonPhi = TH1F('photon_phi', 'Photon Cluster Phi', 180, 0, 360)
+hists.append(fPhotonPhi)
+fPhotonTheta = TH1F('photon_theta', 'Photon Cluster Theta', 180, 0, 360)
+hists.append(fPhotonTheta)
+fPhotonNHits = TH1F('photon_nHits', 'Photon Cluster Number of Calo Hits', 50, 0, 50)
+hists.append(fPhotonNHits)
+
+
+for hist in hists:
+ hist.SetDirectory(0)
+  
+to_process = []
+
+if os.path.isdir(args.inputFile):
+  for r, d, f in os.walk(args.inputFile):
+    for file in f:
+      to_process.append(os.path.join(r, file))
+else:
+  to_process.append(args.inputFile)
+
+# Open input file(s)
+for file in to_process:
+  reader = IOIMPL.LCFactory.getInstance().createLCReader()
+  reader.open(file)
+
+  # Loop through events
+  for ievt, event in enumerate(reader):
+
+    # Initialize empty arrays to store pi0 and photon clusters
+    pi0_clusters = []
+    photon_clusters = []
+    
+    # Initialize pandora cluster collection
+    cluster_coll = event.getCollection('PandoraClusters')
+
+    # Loop through pandora cluster collection
+    for cluster in cluster_coll:
+
+      # Get particle ID of cluster
+      particleIDs = cluster.getParticleIDs()
+      if (len(particleIDs) != 0):
+       particleID = particleIDs[0].getPDG()
+
+       # Fill particle ID hist
+       fClusterID.Fill(particleID)
+      else:
+       particleID = 0
+
+      # Store pi0 and photon clusters
+      if particleID == 111:
+        pi0_clusters.append(cluster)
+      elif particleID == 22:
+        photon_clusters.append(cluster)
+
+    # Loop through pi0 clusters
+    for pi0_cluster in pi0_clusters:
+      energy = pi0_cluster.getEnergy()
+      phi = pi0_cluster.getIPhi()
+      theta = pi0_cluster.getITheta()
+      caloHits = pi0_cluster.getCalorimeterHits()
+      nHits = len(caloHits)
+
+      fPi0Energy.Fill(energy)
+      fPi0Phi.Fill(phi)
+      fPi0Theta.Fill(theta)
+      fPi0NHits.Fill(nHits)
+
+    # Loop through photon clusters
+    for photon_cluster in photon_clusters:
+      energy = photon_cluster.getEnergy()
+      phi = photon_cluster.getIPhi()
+      theta = photon_cluster.getITheta()
+      caloHits = photon_cluster.getCalorimeterHits()
+      nHits = len(caloHits)
+
+      fPhotonEnergy.Fill(energy)
+      fPhotonPhi.Fill(phi)
+      fPhotonTheta.Fill(theta)
+      fPhotonNHits.Fill(nHits)
+
+  # Close input file
+  reader.close()
+
+# Write to output file
+output_file = TFile(args.outputFile, 'RECREATE')
+for hist in hists:
+  hist.Write()
+output_file.Close()
+
+# Plot histograms
+for hist in hists:
+  filename = hist.GetName() + '.png'
+  canvas = TCanvas()
+  hist.Draw()
+  canvas.SaveAs(filename)
