@@ -8,7 +8,7 @@ parser.add_argument(
     "--DD4hepXMLFile",
     help="Compact detector description file",
     type=str,
-    default=os.environ.get("MUCOLL_GEO", ""),
+    default="/scratch/ethanmar/tauStudy/MuColl-TauStudy/detector_geometry/MAIA_v0/MAIA_v0.xml",
 )
 
 parser.add_argument(
@@ -76,7 +76,7 @@ LCIOWriter_all.Parameters = {
                              "DropCollectionTypes": [],
                              "FullSubsetCollections": [],
                              "KeepCollectionNames": [],
-                             "LCIOOutputFile": ["output_reco.slcio"],
+                             "LCIOOutputFile": ["tau_reco_15k_maia.slcio"],
                              "LCIOWriteMode": ["WRITE_NEW"]
                              }
 
@@ -88,7 +88,7 @@ LCIOWriter_light.Parameters = {
                                "DropCollectionTypes": ["SimCalorimeterHit", "CalorimeterHit", "SimTrackerHit", "TrackerHitPlane", "Track", "LCRelation"],
                                "FullSubsetCollections": [],
                                "KeepCollectionNames": ["SiTracks_Refitted", "SiTracks_Refitted_Relations", "PandoraPFOs", "MCPhysicsParticle"],
-                               "LCIOOutputFile": ["output_reco_light.slcio"],
+                               "LCIOOutputFile": ["tau_reco_15k_light_maia.slcio"],
                                "LCIOWriteMode": ["WRITE_NEW"]
                                }
 
