@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<marlin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ilcsoft.desy.de/marlin/marlin.xsd">
+
+    <constants>
+    </constants>
+
+    <!-- ======================================================================================================== -->
+    <!-- ======================================================================================================== -->
+    <!-- == List of processors to execute                                                                      == -->
+    <!-- ======================================================================================================== -->
+    <!-- ======================================================================================================== -->
+
+    <execute>
+        <processor name="MyAIDAProcessor"/>
+        <processor name="EventNumber"/>
+
+        <processor name="PrepareRECParticles"/>
+        <processor name="TauFinderMC"/>
+        <processor name="RecoMCTruthLinker"/>
+        <processor name="EvaluateTauFinderMC"/>
+
+        <processor name="LCIOWriter"/>
+    </execute>
+
+    <global>
+        <parameter name="LCIOInputFiles">Outputs/output_reco.slcio</parameter>
+        <!-- Limit the number of processed records -->
+        <parameter name="MaxRecordNumber" value="-1" />
+        <parameter name="SkipNEvents" value="0" />
+        <parameter name="SupressCheck" value="false" />
+        <parameter name="Verbosity" options="DEBUG0-9,MESSAGE0-9,WARNING0-9,ERROR0-9,SILENT">DEBUG9 </parameter>
+        <parameter name="RandomSeed" value="1234567890" />
+    </global>
+
+    <processor name="PrepareRECParticles" type="MyPrepareRECParticles">
+        <!--Input collections-->
+        <parameter name="MCCollectionName" type="string">MCParticle</parameter>
+        <parameter name="TrackCollectionName" type="string">SiTracks_Refitted</parameter>
+        <!--Parameters (name of the collections)-->
+        <parameter name="outputColMC" type="string">MCParticles_tau</parameter>
+        <parameter name="outputColTracks" type="string">Tracks_tau</parameter>
+        <!--Output collections-->
+        <parameter name="RecCollection" type="string">MCParticles_tau</parameter>
+        <parameter name="RecCollection_Tracks" type="string">Tracks_tau</parameter>
+        <parameter name="MCRECLinkCollectionName" type="string">MCRecLink</parameter>
+        <parameter name="TrackRECLinkCollectionName" type="string">TracksRecLink</parameter>
+    </processor>
+
+    <!--==========TAUS============-->
+    <processor name="TauFinderMC" type="MyTauFinder">
+        <!--TauFinder writes tau candidates as ReconstructedParticles into collection. It runs on a collection of ReconstructedParticels, if you want  to run on MCParticles you have to convert them before hand (use e.g. PrepareRECParticles processor)-->
+        <!--Name of the Signal output file -->
+        <parameter name="FileName_Signal" type="string">./Outputs/Taus.root </parameter>
+        <!--Collection of PFOs-->
+        <parameter name="PFOCollection" type="string" lcioInType="ReconstructedParticle">Tracks_tau </parameter>
+        <!--Collection of Tau Candidates-->
+        <parameter name="TauRecCollection" type="string" lcioOutType="ReconstructedParticle">TauRec_PFO </parameter>
+        <!--Name of the Tau link to ReconstructedParticle collection-->
+        <parameter name="TauRecLinkCollectionName" type="string" lcioOutType="LCRelation">TauRecLink_PFO </parameter>
+        <!--Collection of Particles in Rest Group not in Tau Candidates-->
+        <parameter name="TauRecRestCollection" type="string" lcioOutType="ReconstructedParticle">TauRecRest_PFO </parameter>
+        <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+        <parameter name="Verbosity" type="string">MESSAGE</parameter>
+        <!--Cut on cosT to suppress background-->
+        <parameter name="cosT_cut" type="float">0.99 </parameter>
+        <!--Upper limit on invariant mass of tau candidate-->
+        <parameter name="invariant_mass" type="float">2 </parameter>
+        <!--Outer isolation cone around search cone of tau jet in rad (relativ to cone angle)-->
+        <parameter name="isolationConeAngle" type="float">0.2 </parameter>
+        <!--Energy allowed within isolation cone region-->
+        <parameter name="isolationEnergy" type="float">5 </parameter>
+        <!--Cut on pt to suppress background-->
+        <parameter name="pt_cut" type="float">0.1 </parameter>
+        <!--Minimum tranverse momentum of tau seed-->
+        <parameter name="ptseed" type="float">5.0 </parameter>
+        <!--Opening angle of the search cone for tau jet in rad-->
+        <parameter name="searchConeAngle" type="float">0.05 </parameter>
+    </processor>
+
+    <processor name="RecoMCTruthLinker" type="MyRecoMCTruthLinker">
+        <!--links RecontructedParticles to the MCParticle based on number of hits used-->
+        <!--energy cut for Brems that are kept-->
+        <parameter name="BremsstrahlungEnergyCut" type="float">1 </parameter>
+        <!--Name of the updated calo-hit MCTruthLink output collection - not created if empty()-->
+        <parameter name="CalohitMCTruthLinkName" type="string" lcioOutType="LCRelation"></parameter>
+        <!--Name of the Clusters input collection-->
+        <parameter name="ClusterCollection" type="string" lcioInType="Cluster">PandoraClusters </parameter>
+        <!--Name of the clusterMCTruthLink output collection - not created if empty()-->
+        <parameter name="ClusterMCTruthLinkName" type="string" lcioOutType="LCRelation"></parameter>
+        <!--true: All reco <-> true relations are given, with weight = 10000*calo
+              weight+track weight (weights in permill). false: Only highest contributor
+              linked,and only to tracks, not clusters if there are any tracks-->
+        <parameter name="FullRecoRelation" type="bool">false </parameter>
+        <!--Work-around Mokka bug in vertex-is-not-endpoint-of-parent flag (logic inverted)-->
+        <parameter name="InvertedNonDestructiveInteractionLogic" type="bool"> false </parameter>
+        <!--PDG codes of particles of which the daughters will be kept in the skimmmed MCParticle collection-->
+        <!-- FIXME:Check if we really want to keep those -->
+        <parameter name="KeepDaughtersPDG" type="IntVec">22 111 310 13 211 321 3120 </parameter>
+        <!--Name of the MCParticle input collection-->
+        <parameter name="MCParticleCollection" type="string" lcioInType="MCParticle"> MCParticle </parameter>
+        <!--Name of the skimmed MCParticle  output collection - not created if empty()-->
+        <parameter name="MCParticlesSkimmedName" type="string" lcioOutType="MCParticle"></parameter>
+        <!--Name of the MCTruthClusterLink output collection-->
+        <parameter name="MCTruthClusterLinkName" type="string" lcioOutType="LCRelation"></parameter>
+        <!--Name of the MCTruthRecoLink output collection-->
+        <parameter name="MCTruthRecoLinkName" type="string" lcioOutType="LCRelation"></parameter>
+        <!--Name of the trackMCTruthLink output collection-->
+        <parameter name="MCTruthTrackLinkName" type="string" lcioOutType="LCRelation"></parameter>
+
+        <!--Name of the RecoMCTruthLink output collection - not created if empty()-->
+        <parameter name="RecoMCTruthLinkName" type="string" lcioOutType="LCRelation"> RecoMCTruthLink </parameter>
+        <!--Name of the ReconstructedParticles input collection-->
+        <parameter name="RecoParticleCollection" type="string" lcioInType="ReconstructedParticle"> Tracks_tau </parameter>
+        <!--save photons from Brems-->
+        <parameter name="SaveBremsstrahlungPhotons" type="bool">false </parameter>
+        <!--Names of the SimCaloHits input collections-->
+        <parameter name="SimCaloHitCollections" type="StringVec" lcioInType="SimCalorimeterHit">
+            ECalBarrelCollection
+            ECalEndcapCollection
+            ECalPlugCollection
+            HCalBarrelCollection
+            HCalEndcapCollection
+            HCalRingCollection
+            YokeBarrelCollection
+            YokeEndcapCollection
+        </parameter>
+        <!--Name of the  lcrelation collections, that link the SimCalorimeterHit to CalorimeterHit-->
+        <parameter name="SimCalorimeterHitRelationNames" type="StringVec" lcioInType="LCRelation">
+            CaloHitsRelations MuonHitsRelations
+        </parameter>
+        <!--Names of the SimTrackerHits input collection-->
+        <parameter name="SimTrackerHitCollections" type="StringVec" lcioInType="SimTrackerHit">
+            VertexBarrelCollection
+            VertexEndcapCollection
+            InnerTrackerBarrelCollection
+            OuterTrackerBarrelCollection
+            InnerTrackerEndcapCollection
+            OuterTrackerEndcapCollection
+        </parameter>
+        <!--Name of the Tracks input collection-->
+        <parameter name="TrackCollection" type="string" lcioInType="Track"> SiTracks_Refitted </parameter>
+        <!--Name of the trackMCTruthLink output collection - not created if empty()-->
+        <parameter name="TrackMCTruthLinkName" type="string" lcioOutType="LCRelation"></parameter>
+        <!--Name of the lcrelation collections, that link the TrackerHits to their SimTrackerHits.-->
+        <parameter name="TrackerHitsRelInputCollections" type="StringVec" lcioInType="LCRelation">
+            VXDBarrelHitsRelations
+            VXDEndcapHitsRelations
+            ITBarrelHitsRelations
+            OTBarrelHitsRelations
+            ITEndcapHitsRelations
+            OTEndcapHitsRelations
+        </parameter>
+        <!--true: use relations for TrackerHits, false : use getRawHits -->
+        <parameter name="UseTrackerHitRelations" type="bool"> true </parameter>
+        <!--If Using Particle Gun Ignore Gen Stat-->
+        <parameter name="UsingParticleGun" type="bool"> false </parameter>
+        <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+        <parameter name="Verbosity" type="string"> WARNING </parameter>
+        <!--energy cut for daughters that are kept from KeepDaughtersPDG-->
+        <parameter name="daughtersECutMeV" type="float"> 10 </parameter>
+    </processor>
+
+    <processor name="EvaluateTauFinderMC" type="MyEvaluateTauFinderGun">
+        <parameter name="B_Field" type="float">3.57</parameter>
+        <parameter name="MCCollectionName" type="string" lcioInType="MCParticle">MCParticle</parameter>
+        <parameter name="RECOMCTRUTHCollectionName" type="string" lcioInType="LCRelation">MCRecLink</parameter>
+        <parameter name="TauLinkCollectionName" type="string" lcioInType="LCRelation">TauRecLink_PFO</parameter>
+        <parameter name="TauRecCollection" type="string" lcioInType="ReconstructedParticle">TauRec_PFO</parameter>
+        <parameter name="FileName_Signal" type="string">Outputs/output_EvalTauFinder.root</parameter>
+        <parameter name="Verbosity" options="DEBUG0-9,MESSAGE0-9,WARNING0-9,ERROR0-9,SILENT">DEBUG </parameter>
+    </processor>
+
+    <processor name="MyAIDAProcessor" type="AIDAProcessor">
+        <!--Processor that handles AIDA files. Creates on directory per processor.  Processors only need to create and fill the histograms, clouds and tuples. Needs to be the first ActiveProcessor-->
+        <!-- compression of output file 0: false >0: true (default) -->
+        <parameter name="Compress" type="int" value="1"/>
+        <!-- filename without extension-->
+        <parameter name="FileName" type="string" value="AIDAOutputs/output_taufinder"/>
+        <!-- type of output file xml (default) or root ( only OpenScientist)-->
+        <parameter name="FileType" type="string" value="root "/>
+    </processor>
+
+    <processor name="EventNumber" type="Statusmonitor">
+        <parameter name="HowOften" type="int">10 </parameter>
+        <parameter name="Verbosity" type="string"> MESSAGE </parameter>
+    </processor>
+
+    <!-- LCIO output: keep all collections -->
+        <processor name="LCIOWriter" type="LCIOOutputProcessor">
+        <parameter name="LCIOOutputFile" type="string"> Outputs/output_taufinder.slcio </parameter>
+        <parameter name="FullSubsetCollections" type="StringVec"></parameter>
+        <parameter name="DropCollectionTypes" type="StringVec">
+        CalorimeterHit
+        SimCalorimeterHit
+        Track
+        SimTrackerHit
+        ReconstructedParticle
+        LCRelation
+        Cluster
+        Vertex
+        TrackerHitPlane
+        </parameter>
+        <parameter name="DropCollectionNames" type="StringVec"></parameter>
+        <parameter name="KeepCollectionNames" type="StringVec">
+        MCParticle
+        RecoMCTruthLink
+        TauRecLink_PFO
+        TauRec_PFO
+        SiTracks_Refitted
+        PandoraPFOs
+        </parameter>
+        <parameter name="LCIOWriteMode" type="string" value="WRITE_NEW"/>
+        <parameter name="Verbosity" type="string">MESSAGE </parameter>
+        <!-- <parameter name="SplitFileSizekB" type="int">996147 </parameter> -->
+    </processor>
+</marlin>
