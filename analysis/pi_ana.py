@@ -29,15 +29,27 @@ fNMCPions = TH1F('n_mc_pions', 'Number of MC Pions', 400, 0, 400)
 hists.append(fNMCPions)
 fNRecoPions = TH1F('n_reco_pions', 'Number of Reco Pions', 400, 0, 400)
 hists.append(fNRecoPions)
-fMCPiPt = TH1F('mc_pi_pt', 'MC Pion Pt', 20, 0, 110)
+fMCPiPt = TH1F('mc_pi_pt', 'MC Pion Pt', 30, 0, 300)
 fMCPiPt.SetXTitle('Pt [GeV/c]')
 hists.append(fMCPiPt)
+fMCPiE = TH1F('mc_pi_e', 'MC Pion Energy', 100, 0, 500)
+fMCPiE.SetXTitle('E [GeV]')
+hists.append(fMCPiE)
+fMCPiEta = TH1F('mc_pi_eta', 'MC Pion Pseudorapidity', 30, -3, 3)
+fMCPiEta.SetXTitle('#eta')
+hists.append(fMCPiEta)
 fMCPi0Pt = TH1F('mc_pi0_pt', 'MC Neutral Pion Pt', 20, 0, 110)
 fMCPi0Pt.SetXTitle('Pt [GeV/c]')
 hists.append(fMCPi0Pt)
-fRecoPiPt = TH1F('reco_pi_pt', 'Reco Pion Pt', 20, 0, 110)
+fRecoPiPt = TH1F('reco_pi_pt', 'Reco Pion Pt', 30, 0, 300)
 fRecoPiPt.SetXTitle('Pt [GeV/c]')
 hists.append(fRecoPiPt)
+# fRecoPiE = TH1F('reco_pi_e', 'Reco Pion Energy', 100, 0, 500)
+# fRecoPiE.SetXTitle('E [GeV]')
+# hists.append(fRecoPiE)
+fRecoPiEta = TH1F('reco_pi_eta', 'Reco Pion Pseudorapidity', 30, -3, 3)
+fRecoPiEta.SetXTitle('#eta')
+hists.append(fRecoPiEta)
 fRecoPi0Pt = TH1F('reco_pi0_pt', 'Reco Neutral Pion Pt', 20, 0, 110)
 fRecoPi0Pt.SetXTitle('Pt [GeV/c]')
 hists.append(fRecoPi0Pt)
@@ -56,6 +68,10 @@ if os.path.isdir(args.inputFile):
 else:
   to_process.append(args.inputFile)
 
+# Define function to calculate pseudorapidity from polar angle theta
+def eta(theta):
+  return (-math.log(math.tan(theta/2)))
+  
 # Open input file(s)
 for file in to_process:
   reader = IOIMPL.LCFactory.getInstance().createLCReader()
@@ -75,16 +91,16 @@ for file in to_process:
     for mc_particle in mc_particles:
       #print('Entered MCParticle')
       pdg = abs(mc_particle.getPDG())
-      parents = mc_particle.getParents()
-      if (len(parents) != 0):
-        motherID = parents[-1].getPDG()
-      else:
-        motherID = 0
+      # parents = mc_particle.getParents()
+      # if (len(parents) != 0):
+        # motherID = parents[-1].getPDG()
+      # else:
+        # motherID = 0
 
       # Tag charged and neutral pions
-      if (pdg == 211 and motherID == 15):
+      if (pdg == 211):
         mc_pis.append(mc_particle)
-      elif (pdg == 111 and motherID == 15):
+      elif (pdg == 111):
         mc_pi0s.append(mc_particle)
 
       # Fill PDG hist
@@ -99,9 +115,14 @@ for file in to_process:
       px = p[0]
       py = p[1]
       pt = math.sqrt(px**2 + py**2)
+      E = mc_pi.getEnergy()
+      theta = math.acos(p[2]/(math.sqrt(pt**2+p[2]**2)))
+      eta_ = eta(theta)
 
       # Fill MC charged pion pt hist
       fMCPiPt.Fill(pt)
+      fMCPiE.Fill(E)
+      fMCPiEta.Fill(eta_)
 
     # Loop over neutral pions
     for mc_pi0 in mc_pi0s:
@@ -113,7 +134,7 @@ for file in to_process:
       # Fill MC neutral pion pt hist
       fMCPi0Pt.Fill(pt)
 
-    pfos = event.getCollection('PandoraPFOs')
+    pfos = event.getCollection('SelectedPandoraPFOs')
 
     # Loop over PFOs (reconstructed particles)
     for pfo in pfos:
@@ -143,9 +164,12 @@ for file in to_process:
       px = p[0]
       py = p[1]
       pt = math.sqrt(px**2 + py**2)
+      theta = math.acos(p[2]/(math.sqrt(pt**2+p[2]**2)))
+      eta_ = eta(theta)
 
       # Fill reco charged pion pt hist
       fRecoPiPt.Fill(pt)
+      fRecoPiEta.Fill(eta_)
 
     # Loop over neutral pions
     for reco_pi0 in reco_pi0s:

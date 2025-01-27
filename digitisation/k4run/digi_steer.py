@@ -8,7 +8,7 @@ parser.add_argument(
     "--DD4hepXMLFile",
     help="Compact detector description file",
     type=str,
-    default=os.environ.get("MUCOLL_GEO", ""),
+    default="/scratch/ethanmar/tauStudy/MuColl-TauStudy/detector_geometry/MAIA_v0/MAIA_v0.xml",
 )
 
 parser.add_argument(
@@ -102,7 +102,7 @@ LCIOWriter_all.Parameters = {
                              "DropCollectionTypes": [],
                              "FullSubsetCollections": [],
                              "KeepCollectionNames": [],
-                             "LCIOOutputFile": ["output_digi.slcio"],
+                             "LCIOOutputFile": ["tau_digi_15k_maia.slcio"],
                              "LCIOWriteMode": ["WRITE_NEW"]
                              }
 
@@ -114,7 +114,7 @@ LCIOWriter_light.Parameters = {
                                "DropCollectionTypes": ["SimTrackerHit", "SimCalorimeterHit", "LCRelation"],
                                "FullSubsetCollections": [],
                                "KeepCollectionNames": [],
-                               "LCIOOutputFile": ["output_digi_light.slcio"],
+                               "LCIOOutputFile": ["tau_digi_15k_light_maia.slcio"],
                                "LCIOWriteMode": ["WRITE_NEW"]
                                }
 
@@ -335,8 +335,8 @@ HCalBarrelDigi.Parameters = {
     "ppd_npix": ["2000"],
     "ppd_npix_uncert": ["0"],
     "ppd_pix_spread": ["0"],
-    "threshold": ["2.5e-04"],
-    "thresholdUnit": ["GeV"],
+    "threshold": ["0.5"],
+    "thresholdUnit": ["MIP"],
     #"timingCorrectForPropagation": ["1"],
     "timingCut": ["1"],
     #"timingResolution": ["0"],
@@ -372,8 +372,8 @@ HCalEndcapDigi.Parameters = {
     "ppd_npix": ["2000"],
     "ppd_npix_uncert": ["0"],
     "ppd_pix_spread": ["0"],
-    "threshold": ["2.5e-04"],
-    "thresholdUnit": ["GeV"],
+    "threshold": ["0.5"],
+    "thresholdUnit": ["MIP"],
     #"timingCorrectForPropagation": ["1"],
     "timingCut": ["1"],
     #"timingResolution": ["0"],
@@ -409,8 +409,8 @@ HCalRingDigi.Parameters = {
     "ppd_npix": ["2000"],
     "ppd_npix_uncert": ["0"],
     "ppd_pix_spread": ["0"],
-    "threshold": ["2.5e-04"],
-    "thresholdUnit": ["GeV"],
+    "threshold": ["0.5"],
+    "thresholdUnit": ["MIP"],
     #"timingCorrectForPropagation": ["1"],
     "timingCut": ["1"],
     #"timingResolution": ["0"],

@@ -1,5 +1,5 @@
 from pyLCIO import IOIMPL, EVENT, UTIL
-from ROOT import TH1F, TFile, TCanvas
+from ROOT import TH1F, TFile, TCanvas, TPaveText
 import math
 from argparse import ArgumentParser
 from array import array
@@ -21,13 +21,16 @@ args = parser.parse_args()
 hists = []
 
 # Initialize histograms
-fMatchedPt = TH1F('matched_pt', 'Matched PFO True Pt', 30, 0, 300)
+fMatchedPt = TH1F('matched_pt', 'Matched PFO True Pt', 20, 0, 300)
 hists.append(fMatchedPt)
-fMatchedEta = TH1F('matched_eta', 'Matched PFO True Eta', 25, -3, 3)
+fMatchedEta = TH1F('matched_eta', 'Matched PFO True Eta', 20, 0, 2.5)
 hists.append(fMatchedEta)
-fAllPt = TH1F('all_pt', 'All True Pt', 30, 0, 300)
+fResidualPt = TH1F('res_pt', 'Residual Transverse Momentum', 10, -20, 20)
+fResidualPt.SetXTitle('True - Reco Pt [GeV/c]')
+hists.append(fResidualPt)
+fAllPt = TH1F('all_pt', 'All True Pt', 20, 0, 300)
 hists.append(fAllPt)
-fAllEta = TH1F('all_eta', 'All True Eta', 25, -3, 3)
+fAllEta = TH1F('all_eta', 'All True Eta', 20, 0, 2.5)
 hists.append(fAllEta)
 
 for hist in hists:
@@ -71,7 +74,7 @@ for file in to_process:
 
       # Cut on pT?
 
-      mcTheta = math.acos(mcMom[2]/(math.sqrt(mcPt**2+mcMom**2)))
+      mcTheta = math.acos(mcMom[2]/(math.sqrt(mcPt**2+mcMom[2]**2)))
       mcEta = eta(mcTheta)
 
       # Cut on theta?
@@ -85,13 +88,15 @@ for file in to_process:
       for pfo in pfos:
 
         # Select pions
-        if (abs(pfo.getType() != 211):
+        if (abs(pfo.getType()) != 211):
           continue
 
+        '''
         # Get cluster collection
         clusters = pfo.getClusters()
 
         # Initialize zero minimum dE
+        dE = 0
 
         # Loop over clusters
         for cluster in clusters:
@@ -99,14 +104,15 @@ for file in to_process:
           E_diff = cluster.getEnergy() - mcE
           if (math.fabs(E_diff) > dE):
             dE = E_diff
+        '''
 
         # Get pfo pion kinematic variables
         pfoMom = pfo.getMomentum()
         pfoPt = math.sqrt(pfoMom[0]**2+pfoMom[1]**2)
-        pfoTheta = math.acos(pfoMom[2]/(math.sqrt(pfoPt**2+pfoMom**2)))
+        pfoTheta = math.acos(pfoMom[2]/(math.sqrt(pfoPt**2+pfoMom[2]**2)))
         pfoEta = eta(pfoTheta)
         pfoPhi = math.acos(pfoMom[0]/pfoPt)
-
+        
         # Calculate dR
         dR = math.sqrt((mcPhi-pfoPhi)**2+(mcEta-pfoEta)**2)
         if (dR < min_dR):
@@ -114,10 +120,12 @@ for file in to_process:
 
       if (min_dR < 0.25):
         fMatchedPt.Fill(mcPt)
-        fMatchedEta.Fill(mcEta)
+        fMatchedEta.Fill(abs(mcEta))
+        pT_res = mcPt-pfoPt
+        fResidualPt.Fill(pT_res)
 
       fAllPt.Fill(mcPt)
-      fAllEta.Fill(mcEta)
+      fAllEta.Fill(abs(mcEta))
       
   reader.close()
 
@@ -127,7 +135,7 @@ fPiPtEff.Divide(fPiPtEff, fAllPt, 1, 1, 'B')
 fPiPtEff.SetLineColor(6)
 fPiPtEff.SetLineWidth(2)
 fPiPtEff.SetTitle('Charged Pion Efficiency vs Pt')
-fPiPtEff.GetXaxis().SetTitle('pT [GeV/c]')
+fPiPtEff.GetXaxis().SetTitle('True pT [GeV/c]')
 fPiPtEff.GetYaxis().SetTitle("#epsilon")
 fPiPtEff.SetStats(0)
 hists.append(fPiPtEff)
@@ -138,7 +146,7 @@ fPiEtaEff.Divide(fPiEtaEff, fAllEta, 1, 1, 'B')
 fPiEtaEff.SetLineColor(7)
 fPiEtaEff.SetLineWidth(2)
 fPiEtaEff.SetTitle('Charged Pion Efficiency vs Eta')
-fPiEtaEff.GetXaxis().SetTitle('#eta')
+fPiEtaEff.GetXaxis().SetTitle('True #eta')
 fPiEtaEff.GetYaxis().SetTitle('#epsilon')
 fPiEtaEff.SetStats(0)
 hists.append(fPiEtaEff)
@@ -149,7 +157,7 @@ for hist in hists:
 output_file.Close()
 
 for hist in hists:
-  filename = hist.Name() + '.png'
+  filename = hist.GetTitle() + '.png'
   canvas = TCanvas()
   hist.Draw()
   canvas.SaveAs(filename)

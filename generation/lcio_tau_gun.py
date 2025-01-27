@@ -1,10 +1,8 @@
 # Create lcio files with single tau events
 # E. Martinez, 10/01/2024
 
-# initialize environment:
-# export PYTHONPATH=${LCIO}/src/python:${ROOTSYS}/lib
-
 import math
+import numpy as np
 import random
 from array import array
 from g4units import deg
@@ -12,59 +10,75 @@ from g4units import deg
 # LCIO dependencies
 from pyLCIO import UTIL, EVENT, IMPL, IO, IOIMPL
 
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--nEvents", type=int, default=1000)
+parser.add_argument("--outputFile", type=str, default="tau_gen.slcio")
+args = parser.parse_args()
+
 # Number of events per momentum bin
-nevt = 100000
+nevt = args.nEvents
 
 # Output file
-outfile = "tau_gen.slcio"
+outfile = args.outputFile
 
 # Open output file
 wrt = IOIMPL.LCFactory.getInstance().createLCWriter( )
 wrt.open(outfile, EVENT.LCIO.WRITE_NEW) 
 
 #========== particle properties ===================
-# random.seed()
+random.seed()
 
-'''
-#generate uniform distribution in pT
-pT = []
-for i in range(500):
-    pT.append(random.random()*300.+20) # 20-320 GeV/c
-'''
-pT = 100 # GeV/c
+# Generator status
 genstat  = 1
+
+# PDG
 pdg = 15 # tau
+
+# Mass
 mass =  1.77686 # GeV/c^2
+
+# Charge
 charge = -1.
-decayLen = 1.e22 
+
+# Decay length
+decayLen = 1.e22
+
+# Bounds on theta
+theta_min = 10.0 * deg
+theta_max = 170.0 * deg
 #=================================================
 
-
-
-#for pt in pT:
+# Loop over events
 for n in range(nevt):
+    # Initialize MCParticle collection and event
     col = IMPL.LCCollectionVec(EVENT.LCIO.MCPARTICLE) 
     evt = IMPL.LCEventImpl() 
 
+    # Set event number and add MCParticle collection
     evt.setEventNumber(n)
     evt.addCollection(col, "MCParticle")
 
-    phi =  random.random()*math.pi*2. #uniform distribution in phi
-    theta = math.acos(2*random.random()-1) #uniform distribution in theta
+    # Generate particle properties
+    pT = random.random()*300.+20 # 20-320 GeV/c
+
+    phi =  random.random()*np.pi*2. #uniform distribution in phi
+    theta = random.uniform(theta_min, theta_max) #uniform distribution in theta
                 
-    px = pT*math.cos(phi)
-    py = pT*math.sin(phi)
-    pz = pT/math.tan(theta) 
+    px = pT*np.cos(phi)
+    py = pT*np.sin(phi)
+    pz = pT/np.tan(theta) 
 
-    # Momentum vector
-    momentum  = array('f', [ px, py, pz ])  
+    momentum  = array('f', [px, py, pz])  
 
-    epx = decayLen*math.cos(phi)*math.sin(theta) 
-    epy = decayLen*math.sin(phi)*math.sin(theta)
-    epz = decayLen*math.cos(theta) 
+    epx = decayLen*np.cos(phi)*np.sin(theta) 
+    epy = decayLen*np.sin(phi)*np.sin(theta)
+    epz = decayLen*np.cos(theta) 
 
     # Decay position vector
-    endpoint = array('d',[ epx, epy, epz ] )  
+    endpoint = array('d', [epx, epy, epz])  
         
 
 #--------------- create MCParticle -------------------
@@ -80,9 +94,9 @@ for n in range(nevt):
         mcp.setEndpoint(endpoint) 
 #-------------------------------------------------------
 
-    col.addElement( mcp )
+    col.addElement(mcp)
         
-    wrt.writeEvent( evt )
+    wrt.writeEvent(evt)
 
 
 wrt.close() 
