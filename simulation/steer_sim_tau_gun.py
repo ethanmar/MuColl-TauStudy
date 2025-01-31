@@ -3,11 +3,11 @@ import os
 from DDSim.DD4hepSimulation import DD4hepSimulation
 from g4units import mm, GeV, MeV, m, deg
 from numpy import random
+
 SIM = DD4hepSimulation()
 
 ## Path to the compact geometry description [XML file]
-MAIA_GEO = '/scratch/ethanmar/tauStudy/MuColl-TauStudy/detector_geometry/MAIA_v0/MAIA_v0.xml'
-SIM.compactFile = MAIA_GEO #os.environ.get('MUCOLL_GEO')
+SIM.compactFile = os.environ.get('MUCOLL_GEO')
 ## Lorentz boost for the crossing angle [radian]
 SIM.crossingAngleBoost = 0.
 SIM.enableDetailedShowerMode = True

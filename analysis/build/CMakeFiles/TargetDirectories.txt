@@ -1,0 +1,3 @@
+/scratch/ethanmar/tauStudy/build/CMakeFiles/AnaProcessors.dir
+/scratch/ethanmar/tauStudy/build/CMakeFiles/edit_cache.dir
+/scratch/ethanmar/tauStudy/build/CMakeFiles/rebuild_cache.dir
