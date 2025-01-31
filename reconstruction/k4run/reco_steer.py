@@ -8,7 +8,7 @@ parser.add_argument(
     "--DD4hepXMLFile",
     help="Compact detector description file",
     type=str,
-    default="/scratch/ethanmar/tauStudy/MuColl-TauStudy/detector_geometry/MAIA_v0/MAIA_v0.xml",
+    default=os.environ.get("MUCOLL_GEO", ""),
 )
 
 parser.add_argument(
@@ -23,6 +23,13 @@ parser.add_argument(
     help="TGeometry file for tracking",
     type=str,
     default="/path/to/tgeo.root",
+)
+
+parser.add_argument(
+    "--outputFile",
+    help="Name of output file",
+    type=str,
+    default="output_reco",
 )
 
 the_args = parser.parse_known_args()[0]
@@ -76,7 +83,7 @@ LCIOWriter_all.Parameters = {
                              "DropCollectionTypes": [],
                              "FullSubsetCollections": [],
                              "KeepCollectionNames": [],
-                             "LCIOOutputFile": ["tau_reco_15k_maia.slcio"],
+                             "LCIOOutputFile": [the_args.outputFile + ".slcio"],
                              "LCIOWriteMode": ["WRITE_NEW"]
                              }
 
@@ -88,7 +95,7 @@ LCIOWriter_light.Parameters = {
                                "DropCollectionTypes": ["SimCalorimeterHit", "CalorimeterHit", "SimTrackerHit", "TrackerHitPlane", "Track", "LCRelation"],
                                "FullSubsetCollections": [],
                                "KeepCollectionNames": ["SiTracks_Refitted", "SiTracks_Refitted_Relations", "PandoraPFOs", "MCPhysicsParticle"],
-                               "LCIOOutputFile": ["tau_reco_15k_light_maia.slcio"],
+                               "LCIOOutputFile": [the_args.outputFile + "_light.slcio"],
                                "LCIOWriteMode": ["WRITE_NEW"]
                                }
 
