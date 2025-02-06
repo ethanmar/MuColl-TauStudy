@@ -87,7 +87,7 @@
 
   <!-- LCIO output: keep all collections -->
   <processor name="LCIOWriter_all" type="LCIOOutputProcessor">
-    <parameter name="LCIOOutputFile" type="string"> output_reco.slcio </parameter>
+    <parameter name="LCIOOutputFile" type="string"> tau_reco_15k.slcio </parameter>
     <parameter name="FullSubsetCollections" type="StringVec">  </parameter>
     <parameter name="DropCollectionTypes" type="StringVec">  </parameter>
     <parameter name="DropCollectionNames" type="StringVec">  </parameter>
@@ -99,7 +99,7 @@
 
   <!-- LCIO output: keep only collections relevant for analysis -->
   <processor name="LCIOWriter_light" type="LCIOOutputProcessor">
-    <parameter name="LCIOOutputFile" type="string"> output_reco_light.slcio </parameter>
+    <parameter name="LCIOOutputFile" type="string"> tau_reco_15k_light.slcio </parameter>
     <parameter name="FullSubsetCollections" type="StringVec"> </parameter>
     <!-- Removing SimHits, MCParticles and all the relation info -->
     <parameter name="DropCollectionTypes" type="StringVec">

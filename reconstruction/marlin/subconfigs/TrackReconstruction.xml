@@ -1,11 +1,11 @@
 <processor name="CKFTracking" type="ACTSSeededCKFTrackingProc">
   <!-- Path to material description -->
   <parameter name="MatFile" type="string">
-    /cvmfs/muoncollider.cern.ch/release/2.8-patch2/linux-almalinux9-x86_64/gcc-11.3.1/actstracking-1.1.0-rrtn3jhc747ddrmey53jgsiv5ub5yhs5/share/ACTSTracking/data/material-maps.json
+    /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.3.1/actstracking-1.2.2-tjfu4av5xb6ivzyihvi2a3djbpnqx5nk/share/ACTSTracking/data/material-maps.json
   </parameter>
   <!-- Path to tracking geometry -->
   <parameter name="TGeoFile" type="string">
-    /cvmfs/muoncollider.cern.ch/release/2.8-patch2/linux-almalinux9-x86_64/gcc-11.3.1/actstracking-1.1.0-rrtn3jhc747ddrmey53jgsiv5ub5yhs5/share/ACTSTracking/data/MuColl_v1.root
+    /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.3.1/actstracking-1.2.2-tjfu4av5xb6ivzyihvi2a3djbpnqx5nk/share/ACTSTracking/data/MuColl_v1.root
   </parameter>
   <!-- Vol Layer, use -1 for all, ACTS numbers -->
   <parameter name="SeedingLayers" type="string">
