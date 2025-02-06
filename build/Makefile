@@ -57,7 +57,7 @@ RM = /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.3.1/cmake-3.27.9-frqked
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /scratch/ethanmar/tauStudy/MuColl-TauStudy/MyTauFinder
+CMAKE_SOURCE_DIR = /scratch/ethanmar/tauStudy/MuColl-TauStudy/DefaultTauFinder
 
 # The top-level build directory on which CMake was run.
 CMAKE_BINARY_DIR = /scratch/ethanmar/tauStudy/MuColl-TauStudy/build
@@ -68,7 +68,7 @@ CMAKE_BINARY_DIR = /scratch/ethanmar/tauStudy/MuColl-TauStudy/build
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running CMake cache editor..."
-	/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.3.1/cmake-3.27.9-frqkedjliu3opxtrrowp6tmltgigaszp/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/usr/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -117,233 +117,113 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named MyTauFinder
+# Target rules for targets named DefaultTauFinder
 
 # Build rule for target.
-MyTauFinder: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 MyTauFinder
-.PHONY : MyTauFinder
+DefaultTauFinder: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 DefaultTauFinder
+.PHONY : DefaultTauFinder
 
 # fast build rule for target.
-MyTauFinder/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/build
-.PHONY : MyTauFinder/fast
+DefaultTauFinder/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/build
+.PHONY : DefaultTauFinder/fast
 
-src/HelixClass.o: src/HelixClass.cxx.o
+src/EvaluateTauFinder.o: src/EvaluateTauFinder.cc.o
+.PHONY : src/EvaluateTauFinder.o
+
+# target to build an object file
+src/EvaluateTauFinder.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/EvaluateTauFinder.cc.o
+.PHONY : src/EvaluateTauFinder.cc.o
+
+src/EvaluateTauFinder.i: src/EvaluateTauFinder.cc.i
+.PHONY : src/EvaluateTauFinder.i
+
+# target to preprocess a source file
+src/EvaluateTauFinder.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/EvaluateTauFinder.cc.i
+.PHONY : src/EvaluateTauFinder.cc.i
+
+src/EvaluateTauFinder.s: src/EvaluateTauFinder.cc.s
+.PHONY : src/EvaluateTauFinder.s
+
+# target to generate assembly for a file
+src/EvaluateTauFinder.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/EvaluateTauFinder.cc.s
+.PHONY : src/EvaluateTauFinder.cc.s
+
+src/HelixClass.o: src/HelixClass.cc.o
 .PHONY : src/HelixClass.o
 
 # target to build an object file
-src/HelixClass.cxx.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/HelixClass.cxx.o
-.PHONY : src/HelixClass.cxx.o
+src/HelixClass.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/HelixClass.cc.o
+.PHONY : src/HelixClass.cc.o
 
-src/HelixClass.i: src/HelixClass.cxx.i
+src/HelixClass.i: src/HelixClass.cc.i
 .PHONY : src/HelixClass.i
 
 # target to preprocess a source file
-src/HelixClass.cxx.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/HelixClass.cxx.i
-.PHONY : src/HelixClass.cxx.i
+src/HelixClass.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/HelixClass.cc.i
+.PHONY : src/HelixClass.cc.i
 
-src/HelixClass.s: src/HelixClass.cxx.s
+src/HelixClass.s: src/HelixClass.cc.s
 .PHONY : src/HelixClass.s
 
 # target to generate assembly for a file
-src/HelixClass.cxx.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/HelixClass.cxx.s
-.PHONY : src/HelixClass.cxx.s
+src/HelixClass.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/HelixClass.cc.s
+.PHONY : src/HelixClass.cc.s
 
-src/HelixClass_double.o: src/HelixClass_double.cxx.o
-.PHONY : src/HelixClass_double.o
-
-# target to build an object file
-src/HelixClass_double.cxx.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/HelixClass_double.cxx.o
-.PHONY : src/HelixClass_double.cxx.o
-
-src/HelixClass_double.i: src/HelixClass_double.cxx.i
-.PHONY : src/HelixClass_double.i
-
-# target to preprocess a source file
-src/HelixClass_double.cxx.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/HelixClass_double.cxx.i
-.PHONY : src/HelixClass_double.cxx.i
-
-src/HelixClass_double.s: src/HelixClass_double.cxx.s
-.PHONY : src/HelixClass_double.s
-
-# target to generate assembly for a file
-src/HelixClass_double.cxx.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/HelixClass_double.cxx.s
-.PHONY : src/HelixClass_double.cxx.s
-
-src/LineClass.o: src/LineClass.cxx.o
-.PHONY : src/LineClass.o
+src/SimpleLine.o: src/SimpleLine.cc.o
+.PHONY : src/SimpleLine.o
 
 # target to build an object file
-src/LineClass.cxx.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/LineClass.cxx.o
-.PHONY : src/LineClass.cxx.o
+src/SimpleLine.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/SimpleLine.cc.o
+.PHONY : src/SimpleLine.cc.o
 
-src/LineClass.i: src/LineClass.cxx.i
-.PHONY : src/LineClass.i
+src/SimpleLine.i: src/SimpleLine.cc.i
+.PHONY : src/SimpleLine.i
 
 # target to preprocess a source file
-src/LineClass.cxx.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/LineClass.cxx.i
-.PHONY : src/LineClass.cxx.i
+src/SimpleLine.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/SimpleLine.cc.i
+.PHONY : src/SimpleLine.cc.i
 
-src/LineClass.s: src/LineClass.cxx.s
-.PHONY : src/LineClass.s
+src/SimpleLine.s: src/SimpleLine.cc.s
+.PHONY : src/SimpleLine.s
 
 # target to generate assembly for a file
-src/LineClass.cxx.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/LineClass.cxx.s
-.PHONY : src/LineClass.cxx.s
+src/SimpleLine.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/SimpleLine.cc.s
+.PHONY : src/SimpleLine.cc.s
 
-src/MarlinUtil.o: src/MarlinUtil.cxx.o
-.PHONY : src/MarlinUtil.o
+src/TauFinder.o: src/TauFinder.cc.o
+.PHONY : src/TauFinder.o
 
 # target to build an object file
-src/MarlinUtil.cxx.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MarlinUtil.cxx.o
-.PHONY : src/MarlinUtil.cxx.o
+src/TauFinder.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/TauFinder.cc.o
+.PHONY : src/TauFinder.cc.o
 
-src/MarlinUtil.i: src/MarlinUtil.cxx.i
-.PHONY : src/MarlinUtil.i
-
-# target to preprocess a source file
-src/MarlinUtil.cxx.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MarlinUtil.cxx.i
-.PHONY : src/MarlinUtil.cxx.i
-
-src/MarlinUtil.s: src/MarlinUtil.cxx.s
-.PHONY : src/MarlinUtil.s
-
-# target to generate assembly for a file
-src/MarlinUtil.cxx.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MarlinUtil.cxx.s
-.PHONY : src/MarlinUtil.cxx.s
-
-src/MyEvaluateTauFinder.o: src/MyEvaluateTauFinder.cxx.o
-.PHONY : src/MyEvaluateTauFinder.o
-
-# target to build an object file
-src/MyEvaluateTauFinder.cxx.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyEvaluateTauFinder.cxx.o
-.PHONY : src/MyEvaluateTauFinder.cxx.o
-
-src/MyEvaluateTauFinder.i: src/MyEvaluateTauFinder.cxx.i
-.PHONY : src/MyEvaluateTauFinder.i
+src/TauFinder.i: src/TauFinder.cc.i
+.PHONY : src/TauFinder.i
 
 # target to preprocess a source file
-src/MyEvaluateTauFinder.cxx.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyEvaluateTauFinder.cxx.i
-.PHONY : src/MyEvaluateTauFinder.cxx.i
+src/TauFinder.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/TauFinder.cc.i
+.PHONY : src/TauFinder.cc.i
 
-src/MyEvaluateTauFinder.s: src/MyEvaluateTauFinder.cxx.s
-.PHONY : src/MyEvaluateTauFinder.s
-
-# target to generate assembly for a file
-src/MyEvaluateTauFinder.cxx.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyEvaluateTauFinder.cxx.s
-.PHONY : src/MyEvaluateTauFinder.cxx.s
-
-src/MyPrepareRECParticles.o: src/MyPrepareRECParticles.cxx.o
-.PHONY : src/MyPrepareRECParticles.o
-
-# target to build an object file
-src/MyPrepareRECParticles.cxx.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyPrepareRECParticles.cxx.o
-.PHONY : src/MyPrepareRECParticles.cxx.o
-
-src/MyPrepareRECParticles.i: src/MyPrepareRECParticles.cxx.i
-.PHONY : src/MyPrepareRECParticles.i
-
-# target to preprocess a source file
-src/MyPrepareRECParticles.cxx.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyPrepareRECParticles.cxx.i
-.PHONY : src/MyPrepareRECParticles.cxx.i
-
-src/MyPrepareRECParticles.s: src/MyPrepareRECParticles.cxx.s
-.PHONY : src/MyPrepareRECParticles.s
+src/TauFinder.s: src/TauFinder.cc.s
+.PHONY : src/TauFinder.s
 
 # target to generate assembly for a file
-src/MyPrepareRECParticles.cxx.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyPrepareRECParticles.cxx.s
-.PHONY : src/MyPrepareRECParticles.cxx.s
-
-src/MyRecoMCTruthLinker.o: src/MyRecoMCTruthLinker.cxx.o
-.PHONY : src/MyRecoMCTruthLinker.o
-
-# target to build an object file
-src/MyRecoMCTruthLinker.cxx.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyRecoMCTruthLinker.cxx.o
-.PHONY : src/MyRecoMCTruthLinker.cxx.o
-
-src/MyRecoMCTruthLinker.i: src/MyRecoMCTruthLinker.cxx.i
-.PHONY : src/MyRecoMCTruthLinker.i
-
-# target to preprocess a source file
-src/MyRecoMCTruthLinker.cxx.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyRecoMCTruthLinker.cxx.i
-.PHONY : src/MyRecoMCTruthLinker.cxx.i
-
-src/MyRecoMCTruthLinker.s: src/MyRecoMCTruthLinker.cxx.s
-.PHONY : src/MyRecoMCTruthLinker.s
-
-# target to generate assembly for a file
-src/MyRecoMCTruthLinker.cxx.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyRecoMCTruthLinker.cxx.s
-.PHONY : src/MyRecoMCTruthLinker.cxx.s
-
-src/MyTauFinder.o: src/MyTauFinder.cxx.o
-.PHONY : src/MyTauFinder.o
-
-# target to build an object file
-src/MyTauFinder.cxx.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyTauFinder.cxx.o
-.PHONY : src/MyTauFinder.cxx.o
-
-src/MyTauFinder.i: src/MyTauFinder.cxx.i
-.PHONY : src/MyTauFinder.i
-
-# target to preprocess a source file
-src/MyTauFinder.cxx.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyTauFinder.cxx.i
-.PHONY : src/MyTauFinder.cxx.i
-
-src/MyTauFinder.s: src/MyTauFinder.cxx.s
-.PHONY : src/MyTauFinder.s
-
-# target to generate assembly for a file
-src/MyTauFinder.cxx.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/MyTauFinder.cxx.s
-.PHONY : src/MyTauFinder.cxx.s
-
-src/csvparser.o: src/csvparser.cxx.o
-.PHONY : src/csvparser.o
-
-# target to build an object file
-src/csvparser.cxx.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/csvparser.cxx.o
-.PHONY : src/csvparser.cxx.o
-
-src/csvparser.i: src/csvparser.cxx.i
-.PHONY : src/csvparser.i
-
-# target to preprocess a source file
-src/csvparser.cxx.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/csvparser.cxx.i
-.PHONY : src/csvparser.cxx.i
-
-src/csvparser.s: src/csvparser.cxx.s
-.PHONY : src/csvparser.s
-
-# target to generate assembly for a file
-src/csvparser.cxx.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyTauFinder.dir/build.make CMakeFiles/MyTauFinder.dir/src/csvparser.cxx.s
-.PHONY : src/csvparser.cxx.s
+src/TauFinder.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DefaultTauFinder.dir/build.make CMakeFiles/DefaultTauFinder.dir/src/TauFinder.cc.s
+.PHONY : src/TauFinder.cc.s
 
 # Help Target
 help:
@@ -353,34 +233,19 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... MyTauFinder"
+	@echo "... DefaultTauFinder"
+	@echo "... src/EvaluateTauFinder.o"
+	@echo "... src/EvaluateTauFinder.i"
+	@echo "... src/EvaluateTauFinder.s"
 	@echo "... src/HelixClass.o"
 	@echo "... src/HelixClass.i"
 	@echo "... src/HelixClass.s"
-	@echo "... src/HelixClass_double.o"
-	@echo "... src/HelixClass_double.i"
-	@echo "... src/HelixClass_double.s"
-	@echo "... src/LineClass.o"
-	@echo "... src/LineClass.i"
-	@echo "... src/LineClass.s"
-	@echo "... src/MarlinUtil.o"
-	@echo "... src/MarlinUtil.i"
-	@echo "... src/MarlinUtil.s"
-	@echo "... src/MyEvaluateTauFinder.o"
-	@echo "... src/MyEvaluateTauFinder.i"
-	@echo "... src/MyEvaluateTauFinder.s"
-	@echo "... src/MyPrepareRECParticles.o"
-	@echo "... src/MyPrepareRECParticles.i"
-	@echo "... src/MyPrepareRECParticles.s"
-	@echo "... src/MyRecoMCTruthLinker.o"
-	@echo "... src/MyRecoMCTruthLinker.i"
-	@echo "... src/MyRecoMCTruthLinker.s"
-	@echo "... src/MyTauFinder.o"
-	@echo "... src/MyTauFinder.i"
-	@echo "... src/MyTauFinder.s"
-	@echo "... src/csvparser.o"
-	@echo "... src/csvparser.i"
-	@echo "... src/csvparser.s"
+	@echo "... src/SimpleLine.o"
+	@echo "... src/SimpleLine.i"
+	@echo "... src/SimpleLine.s"
+	@echo "... src/TauFinder.o"
+	@echo "... src/TauFinder.i"
+	@echo "... src/TauFinder.s"
 .PHONY : help
 
 

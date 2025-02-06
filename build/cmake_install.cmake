@@ -1,4 +1,4 @@
-# Install script for directory: /scratch/ethanmar/tauStudy/MuColl-TauStudy/MyTauFinder
+# Install script for directory: /scratch/ethanmar/tauStudy/MuColl-TauStudy/DefaultTauFinder
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
