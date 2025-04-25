@@ -1,0 +1,66 @@
+import ROOT
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+
+parser.add_argument('--inputFileDefault', type=str, default='./tau_gun/MAIA/TauFinderOutputs/tau_ana_default.root')
+parser.add_argument('--inputFileLoose', type=str, default='./tau_gun/MAIA/TauFinderOutputs/tau_ana_loose.root')
+
+args = parser.parse_args()
+
+root_file_default = ROOT.TFile(args.inputFileDefault, 'READ')
+root_file_loose = ROOT.TFile(args.inputFileLoose, 'READ')
+ 
+hDefault = root_file_default.Get('reco_3p_phi_eff')
+#hDefault3P = root_file_default.Get('reco_1p_phi_eff')
+hLoose = root_file_loose.Get('reco_3p_phi_eff')
+hPion = root_file_loose.Get('3p_pi_phi_eff')
+
+hDefault.SetTitle('Three-Prong Reconstruction Efficiencies vs #phi')
+hDefault.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hDefault.GetYaxis().SetRangeUser(0, 0.8)
+
+hDefault.SetLineColor(ROOT.kRed)
+#hDefault3P.SetLineColor(ROOT.kOrange)
+hLoose.SetLineColor(ROOT.kBlue)
+hPion.SetLineColor(ROOT.kGreen)
+
+hDefault.SetLineWidth(2)
+#hDefault3P.SetLineWidth(2)
+hLoose.SetLineWidth(2)
+hPion.SetLineWidth(2)
+
+hDefault.SetMarkerStyle(ROOT.kFullDotLarge)
+hLoose.SetMarkerStyle(ROOT.kMultiply)
+
+hDefault.SetMarkerColor(ROOT.kRed)
+hLoose.SetMarkerColor(ROOT.kBlue)
+
+hDefault.SetMarkerSize(1.5)
+hLoose.SetMarkerSize(1.5)
+
+hDefault.SetStats(0)
+#hDefault3P.SetStats(0)
+hLoose.SetStats(0)
+hPion.SetStats(0)
+
+c = ROOT.TCanvas('c', 'overlay', 800, 600)
+
+hDefault.Draw()
+#hDefault3P.Draw('SAME')
+hLoose.Draw('SAME')
+hPion.Draw('SAME')
+
+legend = ROOT.TLegend(0.70, 0.75, 0.90, 0.90)
+#legend = ROOT.TLegend(0.75, 0.85, 1.05, 1.0)
+legend.AddEntry(hPion, 'Pion Reco', 'l')
+legend.AddEntry(hLoose, 'Loose Tau Reco', 'l')
+legend.AddEntry(hDefault, 'Default Tau Reco', 'l')
+#legend.AddEntry(hDefault3P, '3-Prong', 'l')
+legend.SetBorderSize(1)
+legend.SetFillStyle(1001)
+legend.SetFillColor(ROOT.kWhite)
+legend.Draw()
+
+filename = hDefault.GetTitle() + '.png'
+c.SaveAs(filename)
