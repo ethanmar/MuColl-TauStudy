@@ -1,7 +1,7 @@
 # Instructions for Complete Workflow of Tau (Decay Product) Event Analysis:
 This workflow assumes that you are in the `MuColl-TauStudy` directory:
 
-`cd /your/path/to/MuColl-TauStudy`
+`cd <your path to>/MuColl-TauStudy`
 
 ### Tau Event Generation:
 Generate `n` tau events and write them to `gen_output.slcio`:
