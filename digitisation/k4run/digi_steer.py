@@ -64,7 +64,7 @@ parser.add_argument(
     "--outputFile",
     help="Name of output file",
     type=str,
-    default="output_digi",
+    default="digi_output",
 )
 
 the_args = parser.parse_known_args()[0]
@@ -90,7 +90,7 @@ AIDA.OutputLevel = INFO
 AIDA.ProcessorType = "AIDAProcessor"
 AIDA.Parameters = {
                    "Compress": ["1"],
-                   "FileName": ["output_digi"],
+                   "FileName": ["digi_output"],
                    "FileType": ["root"]
                    }
 

@@ -8,35 +8,46 @@ SIM = DD4hepSimulation()
 
 ## Path to the compact geometry description [XML file]
 SIM.compactFile = os.environ.get('MUCOLL_GEO')
+
 ## Lorentz boost for the crossing angle [radian]
 SIM.crossingAngleBoost = 0.
 SIM.enableDetailedShowerMode = True
 SIM.enableG4GPS = False
 SIM.enableG4Gun = False
 SIM.enableGun = False
+
 ## InputFiles for simulation .stdhep, .slcio, .HEPEvt, .hepevt, .hepmc files are supported
 SIM.inputFiles = "output_gen.slcio" #generated from lcio_tau_gun.py
+
 ## Macro file to execute for runType 'run' or 'vis'
 SIM.macroFile = []
+
 ## number of events to simulate, used in batch mode
 SIM.numberOfEvents = -1
+
 ## Outputfile from the simulation,only lcio output is supported
 SIM.outputFile = "output_sim.slcio"
+
 ## Verbosity use integers from 1 (most) to 7 (least) verbose
 ## or strings: VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS
 SIM.printLevel = 3
+
 ## The type of action to do in this invocation
 ## batch: just simulate some events, needs numberOfEvents, and input file or gun
 ## vis: enable visualisation, run the macroFile if it is set
 ## run: run the macroFile and exit
 ## shell: enable interactive session
 SIM.runType = "batch"
+
 ## Skip first N events when reading a file
 SIM.skipNEvents = 0
+
 ## Steering file to change default behaviour
 SIM.steeringFile = None
+
 ## FourVector of translation for the Smearing of the Vertex position: x y z t
 SIM.vertexOffset = [0.0, 0.0, 0.0, 0.0]
+
 ## FourVector of the Sigma for the Smearing of the Vertex position: x y z t
 SIM.vertexSigma = [0.001 * mm, 0.001 * mm, 0.001 * mm, 0.001 * mm]
 
@@ -69,13 +80,14 @@ SIM.action.tracker = "Geant4TrackerWeightedAction"
 SIM.action.calo = "Geant4ScintillatorCalorimeterAction"
 
 ##  create a map of patterns and actions to be applied to sensitive detectors
-##         example: SIM.action.mapActions['tpc'] = "TPCSDAction" 
+##  example: SIM.action.mapActions['tpc'] = "TPCSDAction" 
 SIM.action.mapActions = {}
 
 
 ################################################################################
 ## Configuration for the magnetic field (stepper) 
 ################################################################################
+
 SIM.field.delta_chord = 0.25*mm
 SIM.field.delta_intersection = 0.001*mm
 SIM.field.delta_one_step = 0.01*mm
@@ -209,6 +221,7 @@ SIM.part.saveProcesses = ['Decay']
 ################################################################################
 ## Configuration for the PhysicsList 
 ################################################################################
+
 SIM.physics.decays = False
 SIM.physics.list = "QGSP_BERT"
 
@@ -222,8 +235,8 @@ SIM.physics.pdgfile = os.path.join( os.environ.get("DD4HEP"), "DDG4/examples/par
 ##     To disable this plugin and be absolutely sure to use the Geant4 default range cut use "None"
 ## 
 ##     Set printlevel to DEBUG to see a printout of all range cuts,
-##     but this only works if range cut is not "None"
-##     
+##     but this only works if range cut is not "None"     
+
 SIM.physics.rangecut = 0.7*mm
 
 SIM.physics.rejectPDGs = {1,2,3,4,5,6,21,23,24,25}
@@ -234,6 +247,7 @@ SIM.physics.rejectPDGs = {1,2,3,4,5,6,21,23,24,25}
 
 ## If True, calculate random seed for each event based on eventID and runID
 ## allows reproducibility even when SkippingEvents
+
 SIM.random.enableEventSeed = True
 SIM.random.file = None
 SIM.random.luxury = 1

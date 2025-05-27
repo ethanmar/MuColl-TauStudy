@@ -29,7 +29,7 @@ parser.add_argument(
     "--outputFile",
     help="Name of output file",
     type=str,
-    default="output_reco",
+    default="reco_output",
 )
 
 the_args = parser.parse_known_args()[0]
@@ -64,7 +64,7 @@ AIDA.OutputLevel = INFO
 AIDA.ProcessorType = "AIDAProcessor"
 AIDA.Parameters = {
                    "Compress": ["1"],
-                   "FileName": ["output_reco"],
+                   "FileName": ["reco_output"],
                    "FileType": ["root"]
                    }
 
