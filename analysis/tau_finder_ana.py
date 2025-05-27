@@ -53,24 +53,28 @@ for i in range(len(event_num_isoE_100)):
 '''        
 plt.scatter(tau_pt, tau_isoE, color='magenta', s=10)
 plt.axhline(y=5, linestyle='--', color='black', label='5 GeV')
-plt.xlabel(r'$p_T$ [GeV/c]')
+plt.xlabel(r'$p_T$ [GeV/c]', fontsize=12)
 #plt.xlim(0,300)
 #plt.ylim(0,30)
-plt.ylabel(r'$E_{iso}$ [GeV]')
-plt.title('Tau Isolation Energy vs Transverse Momentum')
+plt.ylabel(r'$E_{iso}$ [GeV]', fontsize=12)
+plt.title('$\\tau^-$ Isolation Energy vs Transverse Momentum', fontsize=15)
+plt.text(0.01, 0.99, "MAIA Detector Concept\nSimulated $\\tau^-$ Events",
+         transform=plt.gca().transAxes, fontsize=12, va='top', ha='left')
 plt.legend()
 plt.savefig('pt_iso_E.png')
 
-plt.show()
+#plt.show()
 
 '''
 plt.scatter(tau_pt, tau_invM, color='magenta', s=10)
 plt.axhline(y=2, linestyle='--', color='black', label=r'2 $GeV/c^2$')
-plt.xlabel(r'$p_T$ [GeV/c]')
+plt.xlabel(r'$p_T$ [GeV/c]', fontsize=12)
 #plt.xlim(0,300)
 #plt.ylim(0,30)
-plt.ylabel(r'$M_{inv}$ [$GeV/c^2$]')
-plt.title('Tau Invariant Mass vs Transverse Momentum')
+plt.ylabel(r'$M_{inv}$ [$GeV/c^2$]', fontsize=12)
+plt.title('$\\tau^-$ Invariant Mass vs Transverse Momentum', fontsize=15)
+plt.text(0.01, 0.99, "MAIA Detector Concept\nSimulated $\\tau^-$ Events",
+         transform=plt.gca().transAxes, fontsize=12, va='top', ha='left')
 plt.legend()
 plt.savefig('pt_inv_M.png')
 

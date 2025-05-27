@@ -1,4 +1,4 @@
-# Create lcio files with single tau events
+# Create lcio file with single tau events
 # E. Martinez, 10/01/2024
 
 import math
@@ -6,13 +6,12 @@ import numpy as np
 import random
 from array import array
 from g4units import deg
+import argparse
 
 # LCIO dependencies
 from pyLCIO import UTIL, EVENT, IMPL, IO, IOIMPL
 
-
-import argparse
-
+# Command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--nEvents", type=int, default=1000)
 parser.add_argument("--outputFile", type=str, default="tau_gen.slcio")
@@ -29,6 +28,8 @@ wrt = IOIMPL.LCFactory.getInstance().createLCWriter( )
 wrt.open(outfile, EVENT.LCIO.WRITE_NEW) 
 
 #========== particle properties ===================
+
+# Set random seed
 random.seed()
 
 # Generator status
@@ -49,10 +50,12 @@ decayLen = 1.e22
 # Bounds on theta
 theta_min = 10.0 * deg
 theta_max = 170.0 * deg
+
 #=================================================
 
 # Loop over events
 for n in range(nevt):
+    
     # Initialize MCParticle collection and event
     col = IMPL.LCCollectionVec(EVENT.LCIO.MCPARTICLE) 
     evt = IMPL.LCEventImpl() 
@@ -62,10 +65,10 @@ for n in range(nevt):
     evt.addCollection(col, "MCParticle")
 
     # Generate particle properties
-    pT = random.random()*300.+20 # 20-320 GeV/c
+    pT = random.random()*300.+20 # uniform in pT (20-320 GeV/c)
 
-    phi =  random.random()*np.pi*2. #uniform distribution in phi
-    theta = random.uniform(theta_min, theta_max) #uniform distribution in theta
+    phi =  random.random()*np.pi*2. # uniform in phi
+    theta = random.uniform(theta_min, theta_max) # uniform in theta
                 
     px = pT*np.cos(phi)
     py = pT*np.sin(phi)
@@ -82,6 +85,7 @@ for n in range(nevt):
         
 
 #--------------- create MCParticle -------------------
+
     mcp = IMPL.MCParticleImpl() 
 
     mcp.setGeneratorStatus(genstat) 
@@ -91,7 +95,8 @@ for n in range(nevt):
     mcp.setCharge(charge) 
 
     if(decayLen < 1.e9):   
-        mcp.setEndpoint(endpoint) 
+        mcp.setEndpoint(endpoint)
+        
 #-------------------------------------------------------
 
     col.addElement(mcp)
