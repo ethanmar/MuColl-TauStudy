@@ -29,6 +29,8 @@ This produces two output files: `digi_output.slcio` and `digi_output_light.slcio
 ### Reconstruction of Tau Decay Products:
 Reconstruct tracks, clusters, and particles of tau decay products (plus other simulated particles):
 
-`Marlin --global.LCIOInputFiles="digi_output.slcio" reconstruction/marlin/reco_steer.xml`
+`cp -a reconstruction/k4run/PandoraSettings/ ./`
+
+`k4run reconstruction/k4run/reco_steer.py --LcioEvent.Files digi_output.slcio --MatFile ${ACTS_MatFile} -- TGeoFile ${ACTS_TGeoFile}`
 
 Like the digitization steps, this produces two output files: `reco_output.slcio` and `reco_output_light.slcio`. The former contains all collections produced from the reconstruction, while the latter contains only a small subset.
