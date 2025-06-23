@@ -80,7 +80,7 @@
         <ClusterListName>PhotonClusters</ClusterListName>
         <ReplaceCurrentClusterList>false</ReplaceCurrentClusterList>
         <ShouldMakePdfHistograms>false</ShouldMakePdfHistograms>
-        <HistogramFile>PandoraSettings/PandoraLikelihoodData12EBin.xml</HistogramFile>
+        <HistogramFile>/code/SteeringMacros/PandoraSettings/PandoraLikelihoodData12EBin.xml</HistogramFile>
     </algorithm>
 
     <!-- Clustering parent algorithm runs a daughter clustering algorithm -->

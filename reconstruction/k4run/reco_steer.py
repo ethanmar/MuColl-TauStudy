@@ -345,7 +345,7 @@ algList.append(LCIOWriter_light)
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = algList,
                 EvtSel = 'NONE',
-                EvtMax   = -1,
+                EvtMax   = 50,
                 ExtSvc = [evtsvc],
                 OutputLevel=INFO
               )

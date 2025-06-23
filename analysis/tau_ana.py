@@ -74,14 +74,26 @@ hLinkedMCTauPhi3P = TH1F('linked_3p_mc_tau_phi', 'Linked Three-Prong MC Tau Phi'
 hists.append(hLinkedMCTauPhi3P)
 
 # One-prong (reco)
-hLinkedMCTauPt1PReco = TH1F('linked_1p_reco_mc_tau_pt', 'Linked Reco-One-Prong MC Tau Pt', 20, 0, 320)
+hLinkedMCTauPt1PReco = TH1F('linked_1p_reco_mc_tau_pt', 'Linked Reco-One-Prong MC Tau Pt', 10, 0, 320)
 hists.append(hLinkedMCTauPt1PReco)
 
-hLinkedMCTauTheta1PReco = TH1F('linked_1p_reco_mc_tau_theta', 'Linked Reco-One-Prong MC Tau Theta', 20, 0, math.pi)
+hLinkedMCTauTheta1PReco = TH1F('linked_1p_reco_mc_tau_theta', 'Linked Reco-One-Prong MC Tau Theta', 10, 0, math.pi)
 hists.append(hLinkedMCTauTheta1PReco)
 
-hLinkedMCTauPhi1PReco = TH1F('linked_1p_reco_mc_tau_phi', 'Linked Reco-One-Prong MC Tau Phi', 20, 0, math.pi)
+hLinkedMCTauPhi1PReco = TH1F('linked_1p_reco_mc_tau_phi', 'Linked Reco-One-Prong MC Tau Phi', 10, 0, math.pi)
 hists.append(hLinkedMCTauPhi1PReco)
+
+hLinkedMCTauPt1PReco_Barrel = TH1F('linked_1p_reco_mc_tau_pt_barrel', 'Linked Reco-One-Prong MC Tau Pt (Barrel)', 10, 0, 320)
+hists.append(hLinkedMCTauPt1PReco_Barrel)
+
+hLinkedMCTauPhi1PReco_Barrel = TH1F('linked_1p_reco_mc_tau_phi_barrel', 'Linked Reco-One-Prong MC Tau Phi (Barrel)', 10, 0, math.pi)
+hists.append(hLinkedMCTauPhi1PReco_Barrel)
+
+hLinkedMCTauPt1PReco_CentBarrel = TH1F('linked_1p_reco_mc_tau_pt_centbarrel', 'Linked Reco-One-Prong MC Tau Pt (Central Barrel)', 10, 0, 320)
+hists.append(hLinkedMCTauPt1PReco_CentBarrel)
+
+hLinkedMCTauPhi1PReco_CentBarrel = TH1F('linked_1p_reco_mc_tau_phi_centbarrel', 'Linked Reco-One-Prong MC Tau Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hLinkedMCTauPhi1PReco_CentBarrel)
 
 hTauE1P = TH1F('1p_tau_energy', 'Reconstructed One-Prong Tau Energy', 500, 0, 1500)
 hists.append(hTauE1P)
@@ -110,14 +122,26 @@ hTauResPt1P.GetXaxis().SetTitle(r'Pt_{reco} - Pt_{true} [GeV/c]')
 hists.append(hTauResPt1P)
 
 # Three-prong (reco)
-hLinkedMCTauPt3PReco = TH1F('linked_3p_reco_mc_tau_pt', 'Linked Reco-Three-Prong MC Tau Pt', 20, 0, 320)
+hLinkedMCTauPt3PReco = TH1F('linked_3p_reco_mc_tau_pt', 'Linked Reco-Three-Prong MC Tau Pt', 10, 0, 320)
 hists.append(hLinkedMCTauPt3PReco)
 
-hLinkedMCTauTheta3PReco = TH1F('linked_3p_reco_mc_tau_theta', 'Linked Reco-Three-Prong MC Tau Theta', 20, 0, math.pi)
+hLinkedMCTauTheta3PReco = TH1F('linked_3p_reco_mc_tau_theta', 'Linked Reco-Three-Prong MC Tau Theta', 10, 0, math.pi)
 hists.append(hLinkedMCTauTheta3PReco)
 
-hLinkedMCTauPhi3PReco = TH1F('linked_3p_reco_mc_tau_phi', 'Linked Reco-Three-Prong MC Tau Phi', 20, 0, math.pi)
+hLinkedMCTauPhi3PReco = TH1F('linked_3p_reco_mc_tau_phi', 'Linked Reco-Three-Prong MC Tau Phi', 10, 0, math.pi)
 hists.append(hLinkedMCTauPhi3PReco)
+
+hLinkedMCTauPt3PReco_Barrel = TH1F('linked_3p_reco_mc_tau_pt_barrel', 'Linked Reco-Three-Prong MC Tau Pt (Barrel)', 10, 0, 320)
+hists.append(hLinkedMCTauPt3PReco_Barrel)
+
+hLinkedMCTauPhi3PReco_Barrel = TH1F('linked_3p_reco_mc_tau_phi_barrel', 'Linked Reco-Three-Prong MC Tau Phi (Barrel)', 10, 0, math.pi)
+hists.append(hLinkedMCTauPhi3PReco_Barrel)
+
+hLinkedMCTauPt3PReco_CentBarrel = TH1F('linked_3p_reco_mc_tau_pt_centbarrel', 'Linked Reco-Three-Prong MC Tau Pt (Central Barrel)', 10, 0, 320)
+hists.append(hLinkedMCTauPt3PReco_CentBarrel)
+
+hLinkedMCTauPhi3PReco_CentBarrel = TH1F('linked_3p_reco_mc_tau_phi_centbarrel', 'Linked Reco-Three-Prong MC Tau Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hLinkedMCTauPhi3PReco_CentBarrel)
 
 hTauE3P = TH1F('3p_tau_energy', 'Reconstructed Three-Prong Tau Energy', 500, 0, 1500)
 hists.append(hTauE3P)
@@ -147,13 +171,13 @@ hists.append(hTauResPt3P)
 hTauVisETrue = TH1F('tau_true_energy', 'True Tau Visible Energy', 500, 0, 1500)
 hists.append(hTauVisETrue)
 
-hTauVisPtTrue = TH1F('tau_true_pT', 'True Tau Visible Pt', 20, 0, 320)
+hTauVisPtTrue = TH1F('tau_true_pT', 'True Tau Visible Pt', 10, 0, 320)
 hists.append(hTauVisPtTrue)
 
-hTauVisThetaTrue = TH1F('tau_true_theta', 'True Tau Visible Theta', 20, 0, math.pi)
+hTauVisThetaTrue = TH1F('tau_true_theta', 'True Tau Visible Theta', 10, 0, math.pi)
 hists.append(hTauVisThetaTrue)
 
-hTauVisPhiTrue = TH1F('tau_phi_true', 'True Tau Visible Phi', 20, 0, math.pi)
+hTauVisPhiTrue = TH1F('tau_phi_true', 'True Tau Visible Phi', 10, 0, math.pi)
 hists.append(hTauVisPhiTrue)
 
 hTauNVisDaughtersTrue = TH1F('n_tau_visible_daughters_true', 'Number of True Visible Tau Daughters', 10, 0, 10)
@@ -163,14 +187,26 @@ hTauVisDaughterTypeTrue = TH1F('visible_tau_daughter_types_true', 'True Visible 
 hists.append(hTauVisDaughterTypeTrue)
 
 # One-prong
-hTauVisPtTrue1P = TH1F('1p_true_vis_pT', 'True One-Prong Tau Visible Pt', 20, 0, 320)
+hTauVisPtTrue1P = TH1F('1p_true_vis_pT', 'True One-Prong Tau Visible Pt', 10, 0, 320)
 hists.append(hTauVisPtTrue1P)
 
-hTauVisThetaTrue1P = TH1F('1p_true_vis_theta', 'True One-Prong Tau Visible Theta', 20, 0, math.pi)
+hTauVisThetaTrue1P = TH1F('1p_true_vis_theta', 'True One-Prong Tau Visible Theta', 10, 0, math.pi)
 hists.append(hTauVisThetaTrue1P)
 
-hTauVisPhiTrue1P = TH1F('1p_true_vis_phi', 'True One-Prong Tau Visible Phi', 20, 0, math.pi)
+hTauVisPhiTrue1P = TH1F('1p_true_vis_phi', 'True One-Prong Tau Visible Phi', 10, 0, math.pi)
 hists.append(hTauVisPhiTrue1P)
+
+hTauVisPtTrue1P_Barrel = TH1F('1p_true_vis_pT_barrel', 'True One-Prong Tau Visible Pt (Barrel)', 10, 0, 320)
+hists.append(hTauVisPtTrue1P_Barrel)
+
+hTauVisPhiTrue1P_Barrel = TH1F('1p_true_vis_phi_barrel', 'True One-Prong Tau Visible Phi (Barrel)', 10, 0, math.pi)
+hists.append(hTauVisPhiTrue1P_Barrel)
+
+hTauVisPtTrue1P_CentBarrel = TH1F('1p_true_vis_pT_centbarrel', 'True One-Prong Tau Visible Pt (Central Barrel)', 10, 0, 320)
+hists.append(hTauVisPtTrue1P_CentBarrel)
+
+hTauVisPhiTrue1P_CentBarrel = TH1F('1p_true_vis_phi_centbarrel', 'True One-Prong Tau Visible Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hTauVisPhiTrue1P_CentBarrel)
 
 hTauTotPtTrue1P = TH1F('1p_true_tot_pT', 'True One-Prong Tau Total Pt', 20, 0, 320)
 hists.append(hTauTotPtTrue1P)
@@ -182,14 +218,26 @@ hTauTotPhiTrue1P = TH1F('1p_true_tot_phi', 'True One-Prong Tau Total Phi', 20, 0
 hists.append(hTauTotPhiTrue1P)
 
 # Three-prong
-hTauVisPtTrue3P = TH1F('3p_tau_true_pT', 'True Three-Prong Tau Visible Pt', 20, 0, 320)
+hTauVisPtTrue3P = TH1F('3p_tau_true_pT', 'True Three-Prong Tau Visible Pt', 10, 0, 320)
 hists.append(hTauVisPtTrue3P)
 
-hTauVisThetaTrue3P = TH1F('3p_tau_true_theta', 'True Three-Prong Tau Visible Theta', 20, 0, math.pi)
+hTauVisThetaTrue3P = TH1F('3p_tau_true_theta', 'True Three-Prong Tau Visible Theta', 10, 0, math.pi)
 hists.append(hTauVisThetaTrue3P)
 
-hTauVisPhiTrue3P = TH1F('3p_tau_phi_true', 'True Three-Prong Tau Visible Phi', 20, 0, math.pi)
+hTauVisPhiTrue3P = TH1F('3p_tau_phi_true', 'True Three-Prong Tau Visible Phi', 10, 0, math.pi)
 hists.append(hTauVisPhiTrue3P)
+
+hTauVisPtTrue3P_Barrel = TH1F('3p_tau_true_pT_barrel', 'True Three-Prong Tau Visible Pt (Barrel)', 10, 0, 320)
+hists.append(hTauVisPtTrue3P_Barrel)
+
+hTauVisPhiTrue3P_Barrel = TH1F('3p_tau_phi_true_barrel', 'True Three-Prong Tau Visible Phi (Barrel)', 10, 0, math.pi)
+hists.append(hTauVisPhiTrue3P_Barrel)
+
+hTauVisPtTrue3P_CentBarrel = TH1F('3p_tau_true_pT_centbarrel', 'True Three-Prong Tau Visible Pt (Central Barrel)', 10, 0, 320)
+hists.append(hTauVisPtTrue3P_CentBarrel)
+
+hTauVisPhiTrue3P_CentBarrel = TH1F('3p_tau_true_phi_centbarrel', 'True Three-Prong Tau Visible Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hTauVisPhiTrue3P_CentBarrel)
 
 hTauTotPtTrue3P = TH1F('3p_tau_tot_pT', 'True Three-Prong Tau Total Pt', 20, 0, 320)
 hists.append(hTauTotPtTrue3P)
@@ -201,42 +249,90 @@ hTauTotPhiTrue3P = TH1F('3p_tau_phi_tot', 'True Three-Prong Tau Total Phi', 20, 
 hists.append(hTauTotPhiTrue3P)
 
 # 1P Pions
-hPiPtTrue1P = TH1F('1p_pi_true_pT', 'True One-Prong Pion Pt', 20, 0, 320)
+hPiPtTrue1P = TH1F('1p_pi_true_pT', 'True One-Prong Pion Pt', 10, 0, 320)
 hists.append(hPiPtTrue1P)
 
-hPiPhiTrue1P = TH1F('1p_pi_true_phi', 'True One-Prong Pion Phi', 20, 0, math.pi)
+hPiPhiTrue1P = TH1F('1p_pi_true_phi', 'True One-Prong Pion Phi', 10, 0, math.pi)
 hists.append(hPiPhiTrue1P)
 
-hPiThetaTrue1P = TH1F('1p_pi_true_theta', 'True One-Prong Pion Theta', 20, 0, math.pi)
+hPiThetaTrue1P = TH1F('1p_pi_true_theta', 'True One-Prong Pion Theta', 10, 0, math.pi)
 hists.append(hPiThetaTrue1P)
 
-hPiPtMatched1P = TH1F('1p_pi_matched_pT', 'Matched One-Prong Pion Pt', 20, 0, 320)
+hPiPtMatched1P = TH1F('1p_pi_matched_pT', 'Matched One-Prong Pion Pt', 10, 0, 320)
 hists.append(hPiPtMatched1P)
 
-hPiPhiMatched1P = TH1F('1p_pi_matched_phi', 'Matched One-Prong Pion Phi', 20, 0, math.pi)
+hPiPhiMatched1P = TH1F('1p_pi_matched_phi', 'Matched One-Prong Pion Phi', 10, 0, math.pi)
 hists.append(hPiPhiMatched1P)
 
-hPiThetaMatched1P = TH1F('1p_pi_matched_theta', 'Matched One-Prong Pion Theta', 20, 0, math.pi)
+hPiThetaMatched1P = TH1F('1p_pi_matched_theta', 'Matched One-Prong Pion Theta', 10, 0, math.pi)
 hists.append(hPiThetaMatched1P)
 
+hPiPtTrue1P_Barrel = TH1F('1p_pi_true_pT_barrel', 'True One-Prong Pion Pt (Barrel)', 10, 0, 320)
+hists.append(hPiPtTrue1P_Barrel)
+
+hPiPhiTrue1P_Barrel = TH1F('1p_pi_true_phi_barrel', 'True One-Prong Pion Phi (Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiTrue1P_Barrel)
+
+hPiPtMatched1P_Barrel = TH1F('1p_pi_matched_pT_barrel', 'Matched One-Prong Pion Pt (Barrel)', 10, 0, 320)
+hists.append(hPiPtMatched1P_Barrel)
+
+hPiPhiMatched1P_Barrel = TH1F('1p_pi_matched_phi_barrel', 'Matched One-Prong Pion Phi (Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiMatched1P_Barrel)
+
+hPiPtTrue1P_CentBarrel = TH1F('1p_pi_true_pT_centbarrel', 'True One-Prong Pion Pt (Central Barrel)', 10, 0, 320)
+hists.append(hPiPtTrue1P_CentBarrel)
+
+hPiPhiTrue1P_CentBarrel = TH1F('1p_pi_true_phi_centbarrel', 'True One-Prong Pion Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiTrue1P_CentBarrel)
+
+hPiPtMatched1P_CentBarrel = TH1F('1p_pi_matched_pT_centbarrel', 'Matched One-Prong Pion Pt (Central Barrel)', 10, 0, 320)
+hists.append(hPiPtMatched1P_CentBarrel)
+
+hPiPhiMatched1P_CentBarrel = TH1F('1p_pi_matched_phi_centbarrel', 'Matched One-Prong Pion Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiMatched1P_CentBarrel)
+
 # 3P Pions
-hPiPtTrue3P = TH1F('3p_pi_true_pT', 'True Three-Prong Pion Pt', 20, 0, 320)
+hPiPtTrue3P = TH1F('3p_pi_true_pT', 'True Three-Prong Pion Pt', 10, 0, 320)
 hists.append(hPiPtTrue3P)
 
-hPiPhiTrue3P = TH1F('3p_pi_true_phi', 'True Three-Prong Pion Phi', 20, 0, math.pi)
+hPiPhiTrue3P = TH1F('3p_pi_true_phi', 'True Three-Prong Pion Phi', 10, 0, math.pi)
 hists.append(hPiPhiTrue3P)
 
-hPiThetaTrue3P = TH1F('3p_pi_true_theta', 'True Three-Prong Pion Theta', 20, 0, math.pi)
+hPiThetaTrue3P = TH1F('3p_pi_true_theta', 'True Three-Prong Pion Theta', 10, 0, math.pi)
 hists.append(hPiThetaTrue3P)
 
-hPiPtMatched3P = TH1F('3p_pi_matched_pT', 'Matched Three-Prong Pion Pt', 20, 0, 320)
+hPiPtMatched3P = TH1F('3p_pi_matched_pT', 'Matched Three-Prong Pion Pt', 10, 0, 320)
 hists.append(hPiPtMatched3P)
 
-hPiPhiMatched3P = TH1F('3p_pi_matched_phi', 'Matched Three-Prong Pion Phi', 20, 0, math.pi)
+hPiPhiMatched3P = TH1F('3p_pi_matched_phi', 'Matched Three-Prong Pion Phi', 10, 0, math.pi)
 hists.append(hPiPhiMatched3P)
 
-hPiThetaMatched3P = TH1F('3p_pi_matched_theta', 'Matched Three-Prong Pion Theta', 20, 0, math.pi)
+hPiThetaMatched3P = TH1F('3p_pi_matched_theta', 'Matched Three-Prong Pion Theta', 10, 0, math.pi)
 hists.append(hPiThetaMatched3P)
+
+hPiPtTrue3P_Barrel = TH1F('3p_pi_true_pT_barrel', 'True Three-Prong Pion Pt (Barrel)', 10, 0, 320)
+hists.append(hPiPtTrue3P_Barrel)
+
+hPiPhiTrue3P_Barrel = TH1F('3p_pi_true_phi_barrel', 'True Three-Prong Pion Phi (Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiTrue3P_Barrel)
+
+hPiPtMatched3P_Barrel = TH1F('3p_pi_matched_pT_barrel', 'Matched Three-Prong Pion Pt (Barrel)', 10, 0, 320)
+hists.append(hPiPtMatched3P_Barrel)
+
+hPiPhiMatched3P_Barrel = TH1F('3p_pi_matched_phi_barrel', 'Matched Three-Prong Pion Phi (Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiMatched3P_Barrel)
+
+hPiPtTrue3P_CentBarrel = TH1F('3p_pi_true_pT_centbarrel', 'True Three-Prong Pion Pt (Central Barrel)', 10, 0, 320)
+hists.append(hPiPtTrue3P_CentBarrel)
+
+hPiPhiTrue3P_CentBarrel = TH1F('3p_pi_true_phi_centbarrel', 'True Three-Prong Pion Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiTrue3P_CentBarrel)
+
+hPiPtMatched3P_CentBarrel = TH1F('3p_pi_matched_pT_centbarrel', 'Matched Three-Prong Pion Pt (Central Barrel)', 10, 0, 320)
+hists.append(hPiPtMatched3P_CentBarrel)
+
+hPiPhiMatched3P_CentBarrel = TH1F('3p_pi_matched_phi_centbarrel', 'Matched Three-Prong Pion Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiMatched3P_CentBarrel)
 
 # Detach histograms from file/directory
 for hist in hists:
@@ -264,10 +360,10 @@ for file in to_process:
     for ievt, event in enumerate(reader):
 
         # Get collections
-        taus = event.getCollection('TauRec_PFO')
+        taus = event.getCollection('RecoTaus')
         pfos = event.getCollection('PandoraPFOs')
         mcParticles = event.getCollection('MCParticle')
-        tauRecoLink = event.getCollection('TauRecLink_PFO')
+        tauRecoLink = event.getCollection('TauPFOLink')
         recoMCLink = event.getCollection('RecoMCTruthLink')
 
         # Instantiate relation navigators to parse tauReco and RecoMC links
@@ -339,6 +435,16 @@ for file in to_process:
                 hLinkedMCTauTheta1PReco.Fill(theta_vis)
                 hLinkedMCTauPhi1PReco.Fill(phi_vis)                
 
+                # Barrel
+                if (theta_vis > 0.70 and theta_vis < 2.45):
+                    hLinkedMCTauPt1PReco_Barrel.Fill(pt_vis)
+                    hLinkedMCTauPhi1PReco_Barrel.Fill(phi_vis)
+
+                # Central barrel
+                if (theta_vis > 1 and theta_vis < 2):
+                    hLinkedMCTauPt1PReco_CentBarrel.Fill(pt_vis)
+                    hLinkedMCTauPhi1PReco_CentBarrel.Fill(phi_vis)
+                
             # Fill reco-one-prong hists
             if (nRecoQPis == 1 and decayMode == 0):
                 hTauE1P.Fill(E)
@@ -364,6 +470,16 @@ for file in to_process:
                 hLinkedMCTauTheta3PReco.Fill(theta_vis)
                 hLinkedMCTauPhi3PReco.Fill(phi_vis)
 
+                # Barrel
+                if (theta_vis > 0.70 and theta_vis < 2.45):
+                    hLinkedMCTauPt3PReco_Barrel.Fill(pt_vis)
+                    hLinkedMCTauPhi3PReco_Barrel.Fill(phi_vis)
+
+                # Central barrel
+                if (theta_vis > 1 and theta_vis < 2):
+                    hLinkedMCTauPt3PReco_CentBarrel.Fill(pt_vis)
+                    hLinkedMCTauPhi3PReco_CentBarrel.Fill(phi_vis)
+                
             # Fill reco-three-prong hists
             if (nRecoQPis == 3):
                 hTauE3P.Fill(E)
@@ -419,6 +535,16 @@ for file in to_process:
                     hTauTotThetaTrue1P.Fill(tot_theta)
                     hTauTotPhiTrue1P.Fill(tot_phi)
 
+                    # Barrel
+                    if (theta_vis > 0.70 and theta_vis < 2.45):
+                        hTauVisPtTrue1P_Barrel.Fill(pt_vis)
+                        hTauVisPhiTrue1P_Barrel.Fill(phi_vis)
+                    
+                    # Central barrel
+                    if (theta_vis > 1 and theta_vis < 2):
+                        hTauVisPtTrue1P_CentBarrel.Fill(pt_vis)
+                        hTauVisPhiTrue1P_CentBarrel.Fill(phi_vis)
+                        
                 # Fill three-prong hists
                 elif (decayMode == 4):
                     hTauVisPtTrue3P.Fill(pt_vis)
@@ -428,6 +554,16 @@ for file in to_process:
                     hTauTotThetaTrue3P.Fill(tot_theta)
                     hTauTotPhiTrue3P.Fill(tot_phi)
 
+                    # Barrel
+                    if (theta_vis > 0.70 and theta_vis < 2.45):
+                        hTauVisPtTrue3P_Barrel.Fill(pt_vis)
+                        hTauVisPhiTrue3P_Barrel.Fill(phi_vis)
+                    
+                    # Central barrel
+                    if (theta_vis > 1 and theta_vis < 2):
+                        hTauVisPtTrue3P_CentBarrel.Fill(pt_vis)
+                        hTauVisPhiTrue3P_CentBarrel.Fill(phi_vis)
+                    
                 # Investigate pion reco for 1P decays
                 if (decayMode == 0):
 
@@ -438,6 +574,16 @@ for file in to_process:
                             hPiPtTrue1P.Fill(pt_vis)
                             hPiPhiTrue1P.Fill(phi_vis)
                             hPiThetaTrue1P.Fill(theta_vis)
+
+                            # Barrel
+                            if (theta_vis > 0.70 and theta_vis < 2.45):
+                                hPiPtTrue1P_Barrel.Fill(pt_vis)
+                                hPiPhiTrue1P_Barrel.Fill(phi_vis)
+
+                                # Central barrel
+                            if (theta_vis > 1 and theta_vis < 2):
+                                hPiPtTrue1P_CentBarrel.Fill(pt_vis)
+                                hPiPhiTrue1P_CentBarrel.Fill(phi_vis)
 
                     # Loop over pandora pfos
                     matched_mc_pi = None
@@ -454,11 +600,31 @@ for file in to_process:
                         hPiPhiMatched1P.Fill(phi_vis)
                         hPiThetaMatched1P.Fill(theta_vis)
 
+                        # Barrel
+                        if (theta_vis > 0.70 and theta_vis < 2.45):
+                            hPiPtMatched1P_Barrel.Fill(pt_vis)
+                            hPiPhiMatched1P_Barrel.Fill(phi_vis)
+
+                        # Central barrel
+                        if (theta_vis > 1 and theta_vis < 2):
+                            hPiPtMatched1P_CentBarrel.Fill(pt_vis)
+                            hPiPhiMatched1P_CentBarrel.Fill(phi_vis)
+
                 # Investigate pion reco for 3P decays
                 if (decayMode == 4):
                     hPiPtTrue3P.Fill(pt_vis)
                     hPiPhiTrue3P.Fill(phi_vis)
                     hPiThetaTrue3P.Fill(theta_vis)
+
+                    # Barrel
+                    if (theta_vis > 0.70 and theta_vis < 2.45):
+                        hPiPtTrue3P_Barrel.Fill(pt_vis)
+                        hPiPhiTrue3P_Barrel.Fill(phi_vis)
+
+                    # Central barrel
+                    if (theta_vis > 1 and theta_vis < 2):
+                        hPiPtTrue3P_CentBarrel.Fill(pt_vis)
+                        hPiPhiTrue3P_CentBarrel.Fill(phi_vis)
 
                     # Loop over pandora pfos
                     matched_mc_pi = 0
@@ -474,6 +640,16 @@ for file in to_process:
                         hPiPtMatched3P.Fill(pt_vis)
                         hPiPhiMatched3P.Fill(phi_vis)
                         hPiThetaMatched3P.Fill(theta_vis)
+
+                        # Barrel
+                        if (theta_vis > 0.70 and theta_vis < 2.45):
+                            hPiPtMatched3P_Barrel.Fill(pt_vis)
+                            hPiPhiMatched3P_Barrel.Fill(phi_vis)
+
+                        # Central barrel
+                        if (theta_vis > 1 and theta_vis < 2):
+                            hPiPtMatched3P_CentBarrel.Fill(pt_vis)
+                            hPiPhiMatched3P_CentBarrel.Fill(phi_vis)
 
     # Close file
     reader.close()
@@ -571,6 +747,46 @@ hPhiEff1PReco.GetYaxis().SetTitle('#epsilon')
 hPhiEff1PReco.SetStats(0)
 hists.append(hPhiEff1PReco)
 
+hPtEff1PReco_Barrel = hLinkedMCTauPt1PReco_Barrel.Clone('reco_1p_pt_eff_barrel')
+hPtEff1PReco_Barrel.Divide(hPtEff1PReco_Barrel, hTauVisPtTrue1P_Barrel, 1, 1, 'B')
+hPtEff1PReco_Barrel.SetLineColor(6)
+hPtEff1PReco_Barrel.SetLineWidth(2)
+hPtEff1PReco_Barrel.SetTitle('Reco-One-Prong Reconstruction Efficiency vs Pt (Barrel)')
+hPtEff1PReco_Barrel.GetXaxis().SetTitle('True Visible Pt [GeV/c]')
+hPtEff1PReco_Barrel.GetYaxis().SetTitle('#epsilon')
+hPtEff1PReco_Barrel.SetStats(0)
+hists.append(hPtEff1PReco_Barrel)
+
+hPhiEff1PReco_Barrel = hLinkedMCTauPhi1PReco_Barrel.Clone('reco_1p_phi_eff_barrel')
+hPhiEff1PReco_Barrel.Divide(hPhiEff1PReco_Barrel, hTauVisPhiTrue1P_Barrel, 1, 1, 'B')
+hPhiEff1PReco_Barrel.SetLineColor(418)
+hPhiEff1PReco_Barrel.SetLineWidth(2)
+hPhiEff1PReco_Barrel.SetTitle('Reco-One-Prong Reconstruction Efficiency vs Phi (Barrel)')
+hPhiEff1PReco_Barrel.GetXaxis().SetTitle('True Visible #phi [rad]')
+hPhiEff1PReco_Barrel.GetYaxis().SetTitle('#epsilon')
+hPhiEff1PReco_Barrel.SetStats(0)
+hists.append(hPhiEff1PReco_Barrel)
+
+hPtEff1PReco_CentBarrel = hLinkedMCTauPt1PReco_CentBarrel.Clone('reco_1p_pt_eff_centbarrel')
+hPtEff1PReco_CentBarrel.Divide(hPtEff1PReco_CentBarrel, hTauVisPtTrue1P_CentBarrel, 1, 1, 'B')
+hPtEff1PReco_CentBarrel.SetLineColor(6)
+hPtEff1PReco_CentBarrel.SetLineWidth(2)
+hPtEff1PReco_CentBarrel.SetTitle('Reco-One-Prong Reconstruction Efficiency vs Pt (Central Barrel)')
+hPtEff1PReco_CentBarrel.GetXaxis().SetTitle('True Visible Pt [GeV/c]')
+hPtEff1PReco_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPtEff1PReco_CentBarrel.SetStats(0)
+hists.append(hPtEff1PReco_CentBarrel)
+
+hPhiEff1PReco_CentBarrel = hLinkedMCTauPhi1PReco_CentBarrel.Clone('reco_1p_phi_eff_centbarrel')
+hPhiEff1PReco_CentBarrel.Divide(hPhiEff1PReco_CentBarrel, hTauVisPhiTrue1P_CentBarrel, 1, 1, 'B')
+hPhiEff1PReco_CentBarrel.SetLineColor(418)
+hPhiEff1PReco_CentBarrel.SetLineWidth(2)
+hPhiEff1PReco_CentBarrel.SetTitle('Reco-One-Prong Reconstruction Efficiency vs Phi (Central Barrel)')
+hPhiEff1PReco_CentBarrel.GetXaxis().SetTitle('True Visible #phi [rad]')
+hPhiEff1PReco_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPhiEff1PReco_CentBarrel.SetStats(0)
+hists.append(hPhiEff1PReco_CentBarrel)
+
 # Create reco-three-prong efficiency hists
 hPtEff3PReco = hLinkedMCTauPt3PReco.Clone('reco_3p_pt_eff')
 hPtEff3PReco.Divide(hPtEff3PReco, hTauVisPtTrue3P, 1, 1, 'B')
@@ -601,6 +817,46 @@ hPhiEff3PReco.GetXaxis().SetTitle('True Visible #phi [rad]')
 hPhiEff3PReco.GetYaxis().SetTitle('#epsilon')
 hPhiEff3PReco.SetStats(0)
 hists.append(hPhiEff3PReco)
+
+hPtEff3PReco_Barrel = hLinkedMCTauPt3PReco_Barrel.Clone('reco_3p_pt_eff_barrel')
+hPtEff3PReco_Barrel.Divide(hPtEff3PReco_Barrel, hTauVisPtTrue3P_Barrel, 1, 1, 'B')
+hPtEff3PReco_Barrel.SetLineColor(6)
+hPtEff3PReco_Barrel.SetLineWidth(2)
+hPtEff3PReco_Barrel.SetTitle('Reco-Three-Prong Reconstruction Efficiency vs Pt (Barrel)')
+hPtEff3PReco_Barrel.GetXaxis().SetTitle('True Visible Pt [GeV/c]')
+hPtEff3PReco_Barrel.GetYaxis().SetTitle('#epsilon')
+hPtEff3PReco_Barrel.SetStats(0)
+hists.append(hPtEff3PReco_Barrel)
+
+hPhiEff3PReco_Barrel = hLinkedMCTauPhi3PReco_Barrel.Clone('reco_3p_phi_eff_barrel')
+hPhiEff3PReco_Barrel.Divide(hPhiEff3PReco_Barrel, hTauVisPhiTrue3P_Barrel, 1, 1, 'B')
+hPhiEff3PReco_Barrel.SetLineColor(418)
+hPhiEff3PReco_Barrel.SetLineWidth(2)
+hPhiEff3PReco_Barrel.SetTitle('Reco-Three-Prong Reconstruction Efficiency vs Phi (Barrel)')
+hPhiEff3PReco_Barrel.GetXaxis().SetTitle('True Visible #phi [rad]')
+hPhiEff3PReco_Barrel.GetYaxis().SetTitle('#epsilon')
+hPhiEff3PReco_Barrel.SetStats(0)
+hists.append(hPhiEff3PReco_Barrel)
+
+hPtEff3PReco_CentBarrel = hLinkedMCTauPt3PReco_CentBarrel.Clone('reco_3p_pt_eff_centbarrel')
+hPtEff3PReco_CentBarrel.Divide(hPtEff3PReco_CentBarrel, hTauVisPtTrue3P_CentBarrel, 1, 1, 'B')
+hPtEff3PReco_CentBarrel.SetLineColor(6)
+hPtEff3PReco_CentBarrel.SetLineWidth(2)
+hPtEff3PReco_CentBarrel.SetTitle('Reco-Three-Prong Reconstruction Efficiency vs Pt (Central Barrel)')
+hPtEff3PReco_CentBarrel.GetXaxis().SetTitle('True Visible Pt [GeV/c]')
+hPtEff3PReco_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPtEff3PReco_CentBarrel.SetStats(0)
+hists.append(hPtEff3PReco_CentBarrel)
+
+hPhiEff3PReco_CentBarrel = hLinkedMCTauPhi3PReco_CentBarrel.Clone('reco_3p_phi_eff_centbarrel')
+hPhiEff3PReco_CentBarrel.Divide(hPhiEff3PReco_CentBarrel, hTauVisPhiTrue3P_CentBarrel, 1, 1, 'B')
+hPhiEff3PReco_CentBarrel.SetLineColor(418)
+hPhiEff3PReco_CentBarrel.SetLineWidth(2)
+hPhiEff3PReco_CentBarrel.SetTitle('Reco-Three-Prong Reconstruction Efficiency vs Phi (Central Barrel)')
+hPhiEff3PReco_CentBarrel.GetXaxis().SetTitle('True Visible #phi [rad]')
+hPhiEff3PReco_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPhiEff3PReco_CentBarrel.SetStats(0)
+hists.append(hPhiEff3PReco_CentBarrel)
 
 # Create fake one-prong hists
 hPtFake1P = hPtEff1P.Clone('fake_1p_pt')
@@ -695,6 +951,46 @@ hPiPhiEff1P.GetYaxis().SetTitle('#epsilon')
 hPiPhiEff1P.SetStats(0)
 hists.append(hPiPhiEff1P)
 
+hPiPtEff1P_Barrel = hPiPtMatched1P_Barrel.Clone('1p_pi_pt_eff_barrel')
+hPiPtEff1P_Barrel.Divide(hPiPtEff1P_Barrel, hPiPtTrue1P_Barrel, 1, 1, 'B')
+hPiPtEff1P_Barrel.SetLineColor(6)
+hPiPtEff1P_Barrel.SetLineWidth(2)
+hPiPtEff1P_Barrel.SetTitle('One-Prong Pion Reconstruction Efficiency vs Pt (Barrel)')
+hPiPtEff1P_Barrel.GetXaxis().SetTitle('True Visible Pt [GeV/c]')
+hPiPtEff1P_Barrel.GetYaxis().SetTitle('#epsilon')
+hPiPtEff1P_Barrel.SetStats(0)
+hists.append(hPiPtEff1P_Barrel)
+
+hPiPhiEff1P_Barrel = hPiPhiMatched1P_Barrel.Clone('1p_pi_phi_eff_barrel')
+hPiPhiEff1P_Barrel.Divide(hPiPhiEff1P_Barrel, hPiPhiTrue1P_Barrel, 1, 1, 'B')
+hPiPhiEff1P_Barrel.SetLineColor(418)
+hPiPhiEff1P_Barrel.SetLineWidth(2)
+hPiPhiEff1P_Barrel.SetTitle('One-Prong Pion Reconstruction Efficiency vs Phi (Barrel)')
+hPiPhiEff1P_Barrel.GetXaxis().SetTitle('True Visible #phi [rad]')
+hPiPhiEff1P_Barrel.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff1P_Barrel.SetStats(0)
+hists.append(hPiPhiEff1P_Barrel)
+
+hPiPtEff1P_CentBarrel = hPiPtMatched1P_CentBarrel.Clone('1p_pi_pt_eff_centbarrel')
+hPiPtEff1P_CentBarrel.Divide(hPiPtEff1P_CentBarrel, hPiPtTrue1P_CentBarrel, 1, 1, 'B')
+hPiPtEff1P_CentBarrel.SetLineColor(6)
+hPiPtEff1P_CentBarrel.SetLineWidth(2)
+hPiPtEff1P_CentBarrel.SetTitle('One-Prong Pion Reconstruction Efficiency vs Pt (Central Barrel)')
+hPiPtEff1P_CentBarrel.GetXaxis().SetTitle('True Visible Pt [GeV/c]')
+hPiPtEff1P_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPiPtEff1P_CentBarrel.SetStats(0)
+hists.append(hPiPtEff1P_CentBarrel)
+
+hPiPhiEff1P_CentBarrel = hPiPhiMatched1P_CentBarrel.Clone('1p_pi_phi_eff_centbarrel')
+hPiPhiEff1P_CentBarrel.Divide(hPiPhiEff1P_CentBarrel, hPiPhiTrue1P_CentBarrel, 1, 1, 'B')
+hPiPhiEff1P_CentBarrel.SetLineColor(418)
+hPiPhiEff1P_CentBarrel.SetLineWidth(2)
+hPiPhiEff1P_CentBarrel.SetTitle('One-Prong Pion Reconstruction Efficiency vs Phi (Central Barrel)')
+hPiPhiEff1P_CentBarrel.GetXaxis().SetTitle('True Visible #phi [rad]')
+hPiPhiEff1P_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff1P_CentBarrel.SetStats(0)
+hists.append(hPiPhiEff1P_CentBarrel)
+
 # Create 3P Pion Eff Hists
 hPiPtEff3P = hPiPtMatched3P.Clone('3p_pi_pt_eff')
 hPiPtEff3P.Divide(hPiPtEff3P, hPiPtTrue3P, 1, 1, 'B')
@@ -725,6 +1021,46 @@ hPiPhiEff3P.GetXaxis().SetTitle('True Visible #phi [rad]')
 hPiPhiEff3P.GetYaxis().SetTitle('#epsilon')
 hPiPhiEff3P.SetStats(0)
 hists.append(hPiPhiEff3P)
+
+hPiPtEff3P_Barrel = hPiPtMatched3P_Barrel.Clone('3p_pi_pt_eff_barrel')
+hPiPtEff3P_Barrel.Divide(hPiPtEff3P_Barrel, hPiPtTrue3P_Barrel, 1, 1, 'B')
+hPiPtEff3P_Barrel.SetLineColor(6)
+hPiPtEff3P_Barrel.SetLineWidth(2)
+hPiPtEff3P_Barrel.SetTitle('Three-Prong Pion Reconstruction Efficiency vs Pt (Barrel)')
+hPiPtEff3P_Barrel.GetXaxis().SetTitle('True Visible Pt [GeV/c]')
+hPiPtEff3P_Barrel.GetYaxis().SetTitle('#epsilon')
+hPiPtEff3P_Barrel.SetStats(0)
+hists.append(hPiPtEff3P_Barrel)
+
+hPiPhiEff3P_Barrel = hPiPhiMatched3P_Barrel.Clone('3p_pi_phi_eff_barrel')
+hPiPhiEff3P_Barrel.Divide(hPiPhiEff3P_Barrel, hPiPhiTrue3P_Barrel, 1, 1, 'B')
+hPiPhiEff3P_Barrel.SetLineColor(418)
+hPiPhiEff3P_Barrel.SetLineWidth(2)
+hPiPhiEff3P_Barrel.SetTitle('Three-Prong Pion Reconstruction Efficiency vs Phi (Barrel)')
+hPiPhiEff3P_Barrel.GetXaxis().SetTitle('True Visible #phi [rad]')
+hPiPhiEff3P_Barrel.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff3P_Barrel.SetStats(0)
+hists.append(hPiPhiEff3P_Barrel)
+
+hPiPtEff3P_CentBarrel = hPiPtMatched3P_CentBarrel.Clone('3p_pi_pt_eff_centbarrel')
+hPiPtEff3P_CentBarrel.Divide(hPiPtEff3P_CentBarrel, hPiPtTrue3P_CentBarrel, 1, 1, 'B')
+hPiPtEff3P_CentBarrel.SetLineColor(6)
+hPiPtEff3P_CentBarrel.SetLineWidth(2)
+hPiPtEff3P_CentBarrel.SetTitle('Three-Prong Pion Reconstruction Efficiency vs Pt (Central Barrel)')
+hPiPtEff3P_CentBarrel.GetXaxis().SetTitle('True Visible Pt [GeV/c]')
+hPiPtEff3P_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPiPtEff3P_CentBarrel.SetStats(0)
+hists.append(hPiPtEff3P_CentBarrel)
+
+hPiPhiEff3P_CentBarrel = hPiPhiMatched3P_CentBarrel.Clone('3p_pi_phi_eff_centbarrel')
+hPiPhiEff3P_CentBarrel.Divide(hPiPhiEff3P_CentBarrel, hPiPhiTrue3P_CentBarrel, 1, 1, 'B')
+hPiPhiEff3P_CentBarrel.SetLineColor(418)
+hPiPhiEff3P_CentBarrel.SetLineWidth(2)
+hPiPhiEff3P_CentBarrel.SetTitle('Three-Prong Pion Reconstruction Efficiency vs Phi (Central Barrel)')
+hPiPhiEff3P_CentBarrel.GetXaxis().SetTitle('True Visible #phi [rad]')
+hPiPhiEff3P_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff3P_CentBarrel.SetStats(0)
+hists.append(hPiPhiEff3P_CentBarrel)
 
 # Write to output file
 output_file = TFile(args.outputFile, 'RECREATE')

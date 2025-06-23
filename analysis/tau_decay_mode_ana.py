@@ -58,10 +58,55 @@ for n, decay_mode in enumerate(decay_modes):
 
     hists = []
 
-    hNPFOs = TH1F('nPFOs_' + decay_mode, 'Number of Reconstructed PFOs (' + decay_mode + ')', 50, 0, 50)
+    hNTausPerEvent = TH1F('n_taus_per_event_' + decay_mode, 'Number of Taus Reconstructed Per Event (' + decay_mode + ')', 10, 0, 10)
+    hists.append(hNTausPerEvent)
+    hTypeCharged = TH1F('typeCharged_' + decay_mode, 'Type of Charged PFOs (' + decay_mode + ')', 5, 10, 15)
+    hists.append(hTypeCharged)
+    hNCharged = TH1F('nCharged_' + decay_mode, 'Number of Charged PFOs (' + decay_mode + ')', 10, 0, 10)
+    hists.append(hNCharged)
+    hD0Charged_11 = TH1F('d0Charged_pdg11_' + decay_mode, 'Impact Parameter of Charged PFOs (PDG 11, ' + decay_mode + ')', 100, 0, 1)
+    hists.append(hD0Charged_11)
+    hD0Charged_13 = TH1F('d0Charged_pdg13_' + decay_mode, 'Impact Parameter of Charged PFOs (PDG 13, ' + decay_mode + ')', 100, 0, 1)
+    hists.append(hD0Charged_13)
+    hD0Charged_211 = TH1F('d0Charged_pdg211_' + decay_mode, 'Impact Parameter of Charged PFOs (PDG 211, ' + decay_mode + ')', 100, 0, 1)
+    hists.append(hD0Charged_211)
+    hNTracks = TH1F('ntrks_' + decay_mode, 'Number of Reconstructed Tracks (' + decay_mode + ')', 7, 0, 7)
+    hNTracks.GetXaxis().SetTitle('Number of Reconstructed Tracks')
+    hists.append(hNTracks)
+    hNPFOs = TH1F('nPFOs_' + decay_mode, 'Number of Reconstructed PFOs (' + decay_mode + ')', 35, 0, 35)
     hists.append(hNPFOs)
     hTypePFOs = TH1F('typePFOs_' + decay_mode, 'Type of Reconstructed PFOs (' + decay_mode + ')', 1100, 0, 2200)
     hists.append(hTypePFOs)
+    hEnergyPFOs_11 = TH1F('energyPFOs_pdg11_' + decay_mode, 'Energy of Reconstructed PFOs (PDG 11, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hEnergyPFOs_11)
+    hPtPFOs_11 = TH1F('ptPFOs_pdg11_' + decay_mode, 'Transverse Momentum of Reconstructed PFOs (PDG 11, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hPtPFOs_11)
+    hEnergyRatioPFOs_11 = TH1F('energyRatioPFOs_pdg11_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 11, ' + decay_mode + ')', 50, 0, 1)
+    hists.append(hEnergyRatioPFOs_11)
+    hEnergyPFOs_13 = TH1F('energyPFOs_pdg13_' + decay_mode, 'Energy of Reconstructed PFOs (PDG 13, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hEnergyPFOs_13)
+    hPtPFOs_13 = TH1F('ptPFOs_pdg13_' + decay_mode, 'Transverse Momentum of Reconstructed PFOs (PDG 13, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hPtPFOs_13)
+    hEnergyRatioPFOs_13 = TH1F('energyRatioPFOs_pdg13_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 13, ' + decay_mode + ')', 50, 0, 1)
+    hists.append(hEnergyRatioPFOs_13)
+    hEnergyPFOs_22 = TH1F('energyPFOs_pdg22_' + decay_mode, 'Energy of Reconstructed PFOs (PDG 22, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hEnergyPFOs_22)
+    hPtPFOs_22 = TH1F('ptPFOs_pdg22_' + decay_mode, 'Transverse Momentum of Reconstructed PFOs (PDG 22, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hPtPFOs_22)
+    hEnergyRatioPFOs_22 = TH1F('energyRatioPFOs_pdg22_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 22, ' + decay_mode + ')', 50, 0, 1)
+    hists.append(hEnergyRatioPFOs_22)
+    hEnergyPFOs_211 = TH1F('energyPFOs_pdg211_' + decay_mode, 'Energy of Reconstructed PFOs (PDG 211, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hEnergyPFOs_211)
+    hPtPFOs_211 = TH1F('ptPFOs_pdg211_' + decay_mode, 'Transverse Momentum of Reconstructed PFOs (PDG 211, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hPtPFOs_211)
+    hEnergyRatioPFOs_211 = TH1F('energyRatioPFOs_pdg211_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 211, ' + decay_mode + ')', 50, 0, 1)
+    hists.append(hEnergyRatioPFOs_211)
+    hEnergyPFOs_2112 = TH1F('energyPFOs_pdg2112_' + decay_mode, 'Energy of Reconstructed PFOs (PDG 2112, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hEnergyPFOs_2112)
+    hPtPFOs_2112 = TH1F('ptPFOs_pdg2112_' + decay_mode, 'Transverse Momentum of Reconstructed PFOs (PDG 2112, ' + decay_mode + ')', 50, 0, 10)
+    hists.append(hPtPFOs_2112)
+    hEnergyRatioPFOs_2112 = TH1F('energyRatioPFOs_pdg2112_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 2112, ' + decay_mode + ')', 50, 0, 1)
+    hists.append(hEnergyRatioPFOs_2112)
 
     # Detach histograms from file/directory
     for hist in hists:
@@ -80,6 +125,12 @@ for n, decay_mode in enumerate(decay_modes):
     # Keep track of reconstructed PFO types
     pfo_types = {}
 
+    # Keep track of charged PFO types
+    charged_types = {}
+
+    # Keep track of number of tracks
+    n_trks = {}
+
     # Store visible mc tau properties
     E_vis = []
     px_vis = []
@@ -89,6 +140,20 @@ for n, decay_mode in enumerate(decay_modes):
     # Store number of reconstructed PFOs
     n_reco_PFOs = []
 
+    # Store total number of taus that passed
+    n_taus_passed = 0
+    
+    # Store total number of taus that failed number of charged tracks selection
+    n_taus_nchargedtrks = 0
+    
+    # Store total number of taus that failed merge
+    n_taus_merge = 0
+    
+    # Store total number of taus that failed number of particles selection
+    n_taus_nparticles = 0
+
+    types = []
+    
     # Open input file(s)
     for file in to_process:
         reader = IOIMPL.LCFactory.getInstance().createLCReader()
@@ -98,7 +163,10 @@ for n, decay_mode in enumerate(decay_modes):
         for ievt, event in enumerate(reader):
 
             # Get collections
-            # taus = event.getCollection('TauRec_PFO')
+            taus = event.getCollection('RecoTaus')
+            taus_nparticles = event.getCollection('RecoTausNParticles')
+            taus_nchargedtrks = event.getCollection('RecoTausNChargedTrks')
+            taus_merge = event.getCollection('RecoTausMerge')
             pfos = event.getCollection('PandoraPFOs')
             mcParticles = event.getCollection('MCParticle')
             # tauRecoLink = event.getCollection('TauRecLink_PFO')
@@ -108,37 +176,294 @@ for n, decay_mode in enumerate(decay_modes):
             # relationNavigatorTau = UTIL.LCRelationNavigator(tauRecoLink)
             # relationNavigatorRecoMC = UTIL.LCRelationNavigator(recoMCLink)
 
+            # Store number of reconstructed taus per event
+            n_taus_per_event = 0
+
+            for pfo in pfos:
+              pfo_type = abs(pfo.getType())
+              if pfo_type not in types:
+                  types.append(pfo_type)
+            
             # Loop through mcParticles
             for mcParticle in mcParticles:
 
                 # Tag mcTaus
-                if (abs(mcParticle.getPDG()) == 15):
+                if (abs(mcParticle.getPDG()) != 15):
+                    continue
                     
-                    # Get true decay mode
-                    decay_mode_true = getDecayMode(mcParticle)
+                # Get true decay mode
+                decay_mode_true = getDecayMode(mcParticle)
 
-                    # Tag desired decay mode
-                    if decay_mode_true == decay_mode_nums[n]:
+                # Tag desired decay mode
+                if decay_mode_true == decay_mode_nums[n]:
 
-                        # Store visible properties
-                        visible_properties = getVisibleProperties(mcParticle)
-                        E_vis.append(visible_properties[0])
-                        px_vis.append(visible_properties[1])
-                        py_vis.append(visible_properties[2])
-                        pz_vis.append(visible_properties[3])
+                    # Store visible properties
+                    visible_properties = getVisibleProperties(mcParticle)
+                    E_vis.append(visible_properties[0])
+                    px_vis.append(visible_properties[1])
+                    py_vis.append(visible_properties[2])
+                    pz_vis.append(visible_properties[3])
                         
-                        # Fill number of reconstructed PFOs
-                        nPFOs = len(pfos)
-                        n_reco_PFOs.append(nPFOs)
-                        hNPFOs.Fill(nPFOs)
+                    reco_pfos = 0
+                    
+                    # Loop through rec taus which passed
+                    for tau in taus:
+                        n_taus_passed += 1
+                        n_taus_per_event += 1
 
-                        # if nPFOs >= 10:
-                            # print(f'{decay_mode} NUMBER OF PFOS EXCEEDS OR EQUALS 10!!! Number of PFOs in event: {nPFOs}. Run number: {event.getRunNumber()}. Event number: {event.getEventNumber()}')
-                        
-                        # Loop over reconstructed PFOs
+                        # Get reco tau energy
+                        tau_energy = tau.getEnergy()
+
+                        pfos = tau.getParticles()
+                        npfos = len(pfos)
+                        hNPFOs.Fill(npfos)
+                        reco_pfos += npfos
+                        ntrks = 0
                         for pfo in pfos:
+                            pfo_type = abs(pfo.getType())
+                            E = pfo.getEnergy()
+                            E_ratio = E/tau_energy
+                            px = pfo.getMomentum()[0]
+                            py = pfo.getMomentum()[1]
+                            pz = pfo.getMomentum()[2]
+                            pt = math.sqrt(px**2 + py**2)
+                            p = math.sqrt(pt**2 + pz**2)
 
-                            # Fill types of reconstructed PFOs
+                            if str(pfo_type) in pfo_types:
+                                pfo_types[str(pfo_type)] += 1
+                            else:
+                                pfo_types[str(pfo_type)] = 1
+                            
+                            if pfo_type == 11:
+                                hEnergyPFOs_11.Fill(E)
+                                hPtPFOs_11.Fill(pt)
+                                hEnergyRatioPFOs_11.Fill(E_ratio)
+
+                            elif pfo_type == 13:
+                                hEnergyPFOs_13.Fill(E)
+                                hPtPFOs_13.Fill(pt)
+                                hEnergyRatioPFOs_13.Fill(E_ratio)
+                                    
+                            elif pfo_type == 22:
+                                hEnergyPFOs_22.Fill(E)
+                                hPtPFOs_22.Fill(pt)
+                                hEnergyRatioPFOs_22.Fill(E_ratio)
+                                    
+                            elif pfo_type == 211:
+                                hEnergyPFOs_211.Fill(E)
+                                hPtPFOs_211.Fill(pt)
+                                hEnergyRatioPFOs_211.Fill(E_ratio)
+                                    
+                            elif pfo_type == 2112:
+                                hEnergyPFOs_2112.Fill(E)
+                                hPtPFOs_2112.Fill(pt)
+                                hEnergyRatioPFOs_2112.Fill(E_ratio)
+
+                            charge = pfo.getCharge()
+                            if charge != 0:
+                                tracks = pfo.getTracks()
+                                ntrks += len(tracks)
+                                for track in tracks:
+                                    d0 = track.getD0()
+
+                                    if pfo_type == 11:
+                                        hD0Charged_11.Fill(d0)
+                                    elif pfo_type == 13:
+                                        hD0Charged_13.Fill(d0)
+                                    elif pfo_type == 211:
+                                        hD0Charged_211.Fill(d0)
+
+                        hNTracks.Fill(ntrks)
+
+                        if str(ntrks) in n_trks:
+                            n_trks[str(ntrks)] += 1
+                        else:
+                            n_trks[str(ntrks)] = 1
+                                
+                    # Loop through reco taus which failed number of charged tracks
+                    for tau_nchargedtrks in taus_nchargedtrks:
+
+                        n_taus_nchargedtrks += 1
+                        n_taus_per_event += 1
+
+                        # Get reco tau energy
+                        tau_energy = tau_nchargedtrks.getEnergy()
+                        
+                        pfos = tau_nchargedtrks.getParticles()
+                        
+                        ncharged = 0
+                        for pfo in pfos:
+                            if pfo.getCharge() == 0:
+                                continue
+                            ncharged += 1
+
+                            charged_type = abs(pfo.getType())
+                            hTypeCharged.Fill(charged_type)
+
+                            if str(charged_type) in charged_types:
+                                charged_types[str(charged_type)] += 1
+                            else:
+                                charged_types[str(charged_type)] = 1
+
+                        hNCharged.Fill(ncharged)
+
+                        npfos = len(pfos)
+                        hNPFOs.Fill(npfos)
+                        reco_pfos += npfos
+                        ntrks = 0
+                        for pfo in pfos:
+                            pfo_type = abs(pfo.getType())
+                            E = pfo.getEnergy()
+                            E_ratio = E/tau_energy
+                            px = pfo.getMomentum()[0]
+                            py = pfo.getMomentum()[1]
+                            pz = pfo.getMomentum()[2]
+                            pt = math.sqrt(px**2 + py**2)
+                            p = math.sqrt(pt**2 + pz**2)
+
+                            if str(pfo_type) in pfo_types:
+                                pfo_types[str(pfo_type)] += 1
+                            else:
+                                pfo_types[str(pfo_type)] = 1
+
+                            if pfo_type == 11:
+                                hEnergyPFOs_11.Fill(E)
+                                hPtPFOs_11.Fill(pt)
+                                hEnergyRatioPFOs_11.Fill(E_ratio) 
+
+                            elif pfo_type == 13:
+                                hEnergyPFOs_13.Fill(E)
+                                hPtPFOs_13.Fill(pt)
+                                hEnergyRatioPFOs_13.Fill(E_ratio)
+                                
+                            elif pfo_type == 22:
+                                hEnergyPFOs_22.Fill(E)
+                                hPtPFOs_22.Fill(pt)
+                                hEnergyRatioPFOs_22.Fill(E_ratio)
+                                    
+                            elif pfo_type == 211:
+                                hEnergyPFOs_211.Fill(E)
+                                hPtPFOs_211.Fill(pt)
+                                hEnergyRatioPFOs_211.Fill(E_ratio)
+                                    
+                            elif pfo_type == 2112:
+                                hEnergyPFOs_2112.Fill(E)
+                                hPtPFOs_2112.Fill(pt)
+                                hEnergyRatioPFOs_2112.Fill(E_ratio)
+
+                            charge = pfo.getCharge()
+                            if charge != 0:
+                                tracks = pfo.getTracks()
+                                ntrks += len(tracks)
+                                for track in tracks:
+                                    d0 = track.getD0()
+
+                                    if pfo_type == 11:
+                                        hD0Charged_11.Fill(d0)
+                                    elif pfo_type == 13:
+                                        hD0Charged_13.Fill(d0)
+                                    elif pfo_type == 211:
+                                        hD0Charged_211.Fill(d0)
+
+                        hNTracks.Fill(ntrks)
+
+                        if str(ntrks) in n_trks:
+                            n_trks[str(ntrks)] += 1
+                        else:
+                            n_trks[str(ntrks)] = 1
+                        
+                    # Loop through reco taus which failed merge
+                    for tau_merge in taus_merge:
+
+                        n_taus_merge += 1
+                        n_taus_per_event += 1
+                        
+                        # Get reco tau energy
+                        tau_energy = tau_merge.getEnergy()
+                        
+                        pfos = tau_merge.getParticles()
+                        npfos = len(pfos)
+                        hNPFOs.Fill(npfos)
+                        reco_pfos += npfos
+                        ntrks = 0
+                        for pfo in pfos:
+                            pfo_type = abs(pfo.getType())
+                            E = pfo.getEnergy()
+                            E_ratio = E/tau_energy
+                            px = pfo.getMomentum()[0]
+                            py = pfo.getMomentum()[1]
+                            pz = pfo.getMomentum()[2]
+                            pt = math.sqrt(px**2 + py**2)
+                            p = math.sqrt(pt**2 + pz**2)
+
+                            if str(pfo_type) in pfo_types:
+                                pfo_types[str(pfo_type)] += 1
+                            else:
+                                pfo_types[str(pfo_type)] = 1
+                            
+                            if pfo_type == 11:
+                                hEnergyPFOs_11.Fill(E)
+                                hPtPFOs_11.Fill(pt)
+                                hEnergyRatioPFOs_11.Fill(E_ratio)
+
+                            elif pfo_type == 13:
+                                hEnergyPFOs_13.Fill(E)
+                                hPtPFOs_13.Fill(pt)
+                                hEnergyRatioPFOs_13.Fill(E_ratio)
+                                
+                            elif pfo_type == 22:
+                                hEnergyPFOs_22.Fill(E)
+                                hPtPFOs_22.Fill(pt)
+                                hEnergyRatioPFOs_22.Fill(E_ratio)
+
+                            elif pfo_type == 211:
+                                hEnergyPFOs_211.Fill(E)
+                                hPtPFOs_211.Fill(pt)
+                                hEnergyRatioPFOs_211.Fill(E_ratio)
+
+                            elif pfo_type == 2112:
+                                hEnergyPFOs_2112.Fill(E)
+                                hPtPFOs_2112.Fill(pt)
+                                hEnergyRatioPFOs_2112.Fill(E_ratio)
+
+                            charge = pfo.getCharge()
+                            if charge != 0:
+                                tracks = pfo.getTracks()
+                                ntrks += len(tracks)
+                                for track in tracks:
+                                    d0 = track.getD0()
+
+                                    if pfo_type == 11:
+                                        hD0Charged_11.Fill(d0)
+                                    elif pfo_type == 13:
+                                        hD0Charged_13.Fill(d0)
+                                    elif pfo_type == 211:
+                                        hD0Charged_211.Fill(d0)
+
+                        hNTracks.Fill(ntrks)
+
+                        if str(ntrks) in n_trks:
+                            n_trks[str(ntrks)] += 1
+                        else:
+                            n_trks[str(ntrks)] = 1
+                                
+                    # Loop through reco taus which failed number of particles
+                    for tau_nparticles in taus_nparticles:
+
+                        n_taus_nparticles += 1
+                        n_taus_per_event += 1
+                        
+                        # Get reco tau energy
+                        tau_energy = tau_nparticles.getEnergy()
+                        
+                        pfos = tau_nparticles.getParticles()
+
+                        npfos = len(pfos)
+                        hNPFOs.Fill(npfos)
+
+                        reco_pfos += npfos
+                        ntrks = 0
+                        for pfo in pfos:
                             pfo_type = abs(pfo.getType())
                             hTypePFOs.Fill(pfo_type)
 
@@ -147,9 +472,70 @@ for n, decay_mode in enumerate(decay_modes):
                             else:
                                 pfo_types[str(pfo_type)] = 1
 
+                            E = pfo.getEnergy()
+                            E_ratio = E/tau_energy
+                            px = pfo.getMomentum()[0]
+                            py = pfo.getMomentum()[1]
+                            pz = pfo.getMomentum()[2]
+                            pt = math.sqrt(px**2 + py**2)
+                            p = math.sqrt(pt**2 + pz**2)
+
+                            if pfo_type == 11:
+                                hEnergyPFOs_11.Fill(E)
+                                hPtPFOs_11.Fill(pt)
+                                hEnergyRatioPFOs_11.Fill(E_ratio)
+
+                            elif pfo_type == 13:
+                                hEnergyPFOs_13.Fill(E)
+                                hPtPFOs_13.Fill(pt)
+                                hEnergyRatioPFOs_13.Fill(E_ratio)
+                                
+                            elif pfo_type == 22:
+                                hEnergyPFOs_22.Fill(E)
+                                hPtPFOs_22.Fill(pt)
+                                hEnergyRatioPFOs_22.Fill(E_ratio)
+                                
+                            elif pfo_type == 211:
+                                hEnergyPFOs_211.Fill(E)
+                                hPtPFOs_211.Fill(pt)
+                                hEnergyRatioPFOs_211.Fill(E_ratio)
+
+                            elif pfo_type == 2112:
+                                hEnergyPFOs_2112.Fill(E)
+                                hPtPFOs_2112.Fill(pt)
+                                hEnergyRatioPFOs_2112.Fill(E_ratio)
+
+                            charge = pfo.getCharge()
+                            if charge != 0:
+                                tracks = pfo.getTracks()
+                                ntrks += len(tracks)
+                                for track in tracks:
+                                    d0 = track.getD0()
+
+                                    if pfo_type == 11:
+                                        hD0Charged_11.Fill(d0)
+                                    elif pfo_type == 13:
+                                        hD0Charged_13.Fill(d0)
+                                    elif pfo_type == 211:
+                                        hD0Charged_211.Fill(d0)
+
+                        hNTracks.Fill(ntrks)
+
+                        if str(ntrks) in n_trks:
+                            n_trks[str(ntrks)] += 1
+                        else:
+                            n_trks[str(ntrks)] = 1
+                                        
+                    n_reco_PFOs.append(reco_pfos)
+
+            hNTausPerEvent.Fill(n_taus_per_event)
+                    
         # Close file
         reader.close()
 
+    for pfo_type in types:
+        print(f'PFO Type: {pfo_type}')
+        
     # Calculate remaining visible properties
     pt_vis = np.sqrt(np.power(px_vis, 2) + np.power(py_vis, 2))
     p_vis = np.sqrt(np.power(pt_vis, 2) + np.power(pz_vis, 2))
@@ -239,3 +625,17 @@ for n, decay_mode in enumerate(decay_modes):
     with open(decay_mode + '_pfo_types.txt', 'w') as file:
         for key, value in pfo_types.items():
             print(f'Type: {key}, Total Number: {value}', file=file)
+
+    with open(decay_mode + '_charged_types.txt', 'w') as file:
+        for key, value in charged_types.items():
+            print(f'Type: {key}, Total Number: {value}', file=file)
+
+    with open(decay_mode + '_cutflow.txt', 'w') as file:
+        print(f'Number of taus that passed: {n_taus_passed}', file=file)
+        print(f'Number of taus that failed number of charged tracks: {n_taus_nchargedtrks}', file=file)
+        print(f'Number of taus that failed merge: {n_taus_merge}', file=file)
+        print(f'Number of taus that failed number of particles: {n_taus_nparticles}', file=file)
+
+    with open(decay_mode + '_ntrks.txt', 'w') as file:
+        for key, value in n_trks.items():
+            print(f'Number of Tracks: {key}, Total Numebr: {value}', file=file)
