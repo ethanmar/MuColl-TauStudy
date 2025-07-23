@@ -35,6 +35,7 @@ def getDeltaR(mom_1, mom_2):
 
     return math.sqrt(delta_eta**2 + delta_phi**2)
 
+'''
 def getRecoPDG(mcParticle, pfos):
 
     # Get mcParticle momentum
@@ -61,6 +62,7 @@ def getRecoPDG(mcParticle, pfos):
                 pdg_reco = abs(pfo.getType())
 
     return pdg_reco
+'''
 
 # Command line arguments
 parser = ArgumentParser()
@@ -80,6 +82,7 @@ if os.path.isdir(args.inputFile):
 else:
     to_process.append(args.inputFile)
 
+    '''
 # Keep track of true pdg
 true_pdg_1P0N = []
 true_pdg_3P0N = []
@@ -87,6 +90,24 @@ true_pdg_3P0N = []
 # Keep track of reco pdg
 reco_pdg_1P0N = []
 reco_pdg_3P0N = []
+'''
+
+# Keep track of deltaR
+deltaR_1p0n = []
+deltaR_3p0n = []
+
+# Keep track of etas
+eta_true_1p0n = []
+eta_reco_1p0n = []
+eta_true_3p0n = []
+eta_reco_3p0n = []
+
+# Keep track of phis
+phi_true_1p0n = []
+phi_reco_1p0n = []
+phi_true_3p0n = []
+phi_reco_3p0n = []
+
 
 # Open input file(s)
 for file in to_process:
@@ -106,11 +127,34 @@ for file in to_process:
             if abs(mcParticle.getPDG()) == 15:
                 decay_mode = getDecayMode(mcParticle)
 
-        if decay_mode == 0:
+        if decay_mode == 0 or decay_mode == 4:
             for mcParticle in mcParticles:
                 true_pdg = abs(mcParticle.getPDG())
                 if true_pdg != 211:
                     continue
+                true_mom = mcParticle.getMomentum()
+                true_phi = getPhi(true_mom)
+                true_eta = getEta(true_mom)
+                for pfo in pfos:
+                    reco_pdg = abs(pfo.getType())
+                    if reco_pdg == 211:
+                        reco_mom = pfo.getMomentum()
+                        reco_phi = getPhi(reco_mom)
+                        reco_eta = getEta(reco_mom)
+                        deltaR = getDeltaR(true_mom, reco_mom)
+                        if decay_mode == 0:
+                            deltaR_1p0n.append(deltaR)
+                            phi_true_1p0n.append(true_phi)
+                            phi_reco_1p0n.append(reco_phi)
+                            eta_true_1p0n.append(true_eta)
+                            eta_reco_1p0n.append(reco_eta)
+                        elif decay_mode == 4:
+                            deltaR_3p0n.append(deltaR)
+                            phi_true_3p0n.append(true_phi)
+                            phi_reco_3p0n.append(reco_phi)
+                            eta_true_3p0n.append(true_eta)
+                            eta_reco_3p0n.append(reco_eta)
+                '''
                 reco_pdg = getRecoPDG(mcParticle, pfos)
                 if decay_mode == 0:
                     reco_pdg_1P0N.append(reco_pdg)
@@ -118,11 +162,63 @@ for file in to_process:
                 elif decay_mode == 4:
                     reco_pdg_3P0N.append(reco_pdg)
                     true_pdg_3P0N.append(true_pdg)     
-
+                '''
+                
     reader.close()
                     
 plt.figure(figsize=(10,10))
 
+plt.clf()
+plt.hist(deltaR_1p0n, bins=25, color='blue')
+plt.xlabel('DeltaR (1P0N)')
+plt.savefig('deltaR_1p0n.png')
+
+plt.clf()
+plt.hist(deltaR_3p0n, bins=25, color='blue')
+plt.xlabel('DeltaR (3P0N)')
+plt.savefig('deltaR_3p0n.png')
+
+plt.clf()
+plt.hist(phi_true_1p0n, bins=25, color='blue')
+plt.xlabel('True Phi (1P0N)')
+plt.savefig('phi_true_1p0n.png')
+
+plt.clf()
+plt.hist(phi_reco_1p0n, bins=25, color='blue')
+plt.xlabel('Reco Phi (1P0N)')
+plt.savefig('phi_reco_1p0n.png')
+
+plt.clf()
+plt.hist(phi_true_3p0n, bins=25, color='blue')
+plt.xlabel('True Phi (3P0N)')
+plt.savefig('phi_true_3p0n.png')
+
+plt.clf()
+plt.hist(phi_reco_3p0n, bins=25, color='blue')
+plt.xlabel('Reco Phi (3P0N)')
+plt.savefig('phi_reco_3p0n.png')
+
+plt.clf()
+plt.hist(eta_true_1p0n, bins=25, color='blue')
+plt.xlabel('True Eta (1P0N)')
+plt.savefig('eta_true_1p0n.png')
+
+plt.clf()
+plt.hist(eta_reco_1p0n, bins=25, color='blue')
+plt.xlabel('Reco Eta (1P0N)')
+plt.savefig('eta_reco_1p0n.png')
+
+plt.clf()
+plt.hist(eta_true_3p0n, bins=25, color='blue')
+plt.xlabel('True Eta (3P0N)')
+plt.savefig('eta_true_3p0n.png')
+
+plt.clf()
+plt.hist(eta_reco_3p0n, bins=25, color='blue')
+plt.xlabel('Reco Eta (3P0N)')
+plt.savefig('eta_reco_3p0n.png')
+
+'''
 # Create 1P0N confusion matrix
 plt.clf()
 disp_1P0N = ConfusionMatrixDisplay.from_predictions(reco_pdg_1P0N, true_pdg_1P0N, normalize='pred', include_values=True, cmap='Blues', colorbar=True)
@@ -142,4 +238,4 @@ disp_3P0N.ax_.invert_yaxis()
 plt.xticks(rotation=90)
 plt.tight_layout()
 plt.savefig('pdg_id_3P0N_confusion.png')
-
+'''

@@ -83,31 +83,41 @@ for n, decay_mode in enumerate(decay_modes):
     hists.append(hPtPFOs_11)
     hEnergyRatioPFOs_11 = TH1F('energyRatioPFOs_pdg11_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 11, ' + decay_mode + ')', 50, 0, 1)
     hists.append(hEnergyRatioPFOs_11)
+    # hNHitsPFOs_11 = TH1F('nHitsPFOs_pdg11_' + decay_mode, 'Number of Detector Hits of Reconstructed PFOs (PDG 11, '+ decay_mode + ')', 250, 0, 500)
+    # hists.append(hNHitsPFOs_11)
     hEnergyPFOs_13 = TH1F('energyPFOs_pdg13_' + decay_mode, 'Energy of Reconstructed PFOs (PDG 13, ' + decay_mode + ')', 50, 0, 10)
     hists.append(hEnergyPFOs_13)
     hPtPFOs_13 = TH1F('ptPFOs_pdg13_' + decay_mode, 'Transverse Momentum of Reconstructed PFOs (PDG 13, ' + decay_mode + ')', 50, 0, 10)
     hists.append(hPtPFOs_13)
     hEnergyRatioPFOs_13 = TH1F('energyRatioPFOs_pdg13_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 13, ' + decay_mode + ')', 50, 0, 1)
     hists.append(hEnergyRatioPFOs_13)
+    # hNHitsPFOs_13 = TH1F('nHitsPFOs_pdg13_' + decay_mode, 'Number of Detector Hits of Reconstructed PFOs (PDG 13, '+ decay_mode + ')', 250, 0, 500)
+    # hists.append(hNHitsPFOs_13)
     hEnergyPFOs_22 = TH1F('energyPFOs_pdg22_' + decay_mode, 'Energy of Reconstructed PFOs (PDG 22, ' + decay_mode + ')', 50, 0, 10)
     hists.append(hEnergyPFOs_22)
     hPtPFOs_22 = TH1F('ptPFOs_pdg22_' + decay_mode, 'Transverse Momentum of Reconstructed PFOs (PDG 22, ' + decay_mode + ')', 50, 0, 10)
     hists.append(hPtPFOs_22)
     hEnergyRatioPFOs_22 = TH1F('energyRatioPFOs_pdg22_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 22, ' + decay_mode + ')', 50, 0, 1)
     hists.append(hEnergyRatioPFOs_22)
+    # hNHitsPFOs_22 = TH1F('nHitsPFOs_pdg22_' + decay_mode, 'Number of Detector Hits of Reconstructed PFOs (PDG 22, '+ decay_mode + ')', 250, 0, 500)
+    # hists.append(hNHitsPFOs_22)
     hEnergyPFOs_211 = TH1F('energyPFOs_pdg211_' + decay_mode, 'Energy of Reconstructed PFOs (PDG 211, ' + decay_mode + ')', 50, 0, 10)
     hists.append(hEnergyPFOs_211)
     hPtPFOs_211 = TH1F('ptPFOs_pdg211_' + decay_mode, 'Transverse Momentum of Reconstructed PFOs (PDG 211, ' + decay_mode + ')', 50, 0, 10)
     hists.append(hPtPFOs_211)
     hEnergyRatioPFOs_211 = TH1F('energyRatioPFOs_pdg211_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 211, ' + decay_mode + ')', 50, 0, 1)
     hists.append(hEnergyRatioPFOs_211)
+    # hNHitsPFOs_211 = TH1F('nHitsPFOs_pdg211_' + decay_mode, 'Number of Detector Hits of Reconstructed PFOs (PDG 211, '+ decay_mode + ')', 250, 0, 500)
+    # hists.append(hNHitsPFOs_211)
     hEnergyPFOs_2112 = TH1F('energyPFOs_pdg2112_' + decay_mode, 'Energy of Reconstructed PFOs (PDG 2112, ' + decay_mode + ')', 50, 0, 10)
     hists.append(hEnergyPFOs_2112)
     hPtPFOs_2112 = TH1F('ptPFOs_pdg2112_' + decay_mode, 'Transverse Momentum of Reconstructed PFOs (PDG 2112, ' + decay_mode + ')', 50, 0, 10)
     hists.append(hPtPFOs_2112)
     hEnergyRatioPFOs_2112 = TH1F('energyRatioPFOs_pdg2112_' + decay_mode, 'Energy Ratio of Reconstructed PFOs (PDG 2112, ' + decay_mode + ')', 50, 0, 1)
     hists.append(hEnergyRatioPFOs_2112)
-
+    # hNHitsPFOs_2112 = TH1F('nHitsPFOs_pdg2112_' + decay_mode, 'Number of Detector Hits of Reconstructed PFOs (PDG 2112, '+ decay_mode + ')', 250, 0, 500)
+    # hists.append(hNHitsPFOs_2112)
+    
     # Detach histograms from file/directory
     for hist in hists:
         hist.SetDirectory(0)
@@ -229,6 +239,26 @@ for n, decay_mode in enumerate(decay_modes):
                             pt = math.sqrt(px**2 + py**2)
                             p = math.sqrt(pt**2 + pz**2)
 
+                            '''
+                            n_calo_hits = 0
+                            n_trkr_hits = 0
+
+                            clusters = pfo.getClusters()
+                            for cluster in clusters:
+                                if cluster is None:
+                                    continue
+                                calo_hits = cluster.getCalorimeterHits()
+                                n_calo_hits += len(calo_hits)
+                                
+                            if (pfo.getCharge() != 0):
+                                tracks = pfo.getTracks()
+                                for track in tracks:
+                                    trkr_hits = track.getTrackerHits()
+                                    n_trker_hits += len(trkr_hits)
+
+                            n_hits = n_calo_hits + n_trkr_hits
+                            '''
+                            
                             if str(pfo_type) in pfo_types:
                                 pfo_types[str(pfo_type)] += 1
                             else:
@@ -238,26 +268,31 @@ for n, decay_mode in enumerate(decay_modes):
                                 hEnergyPFOs_11.Fill(E)
                                 hPtPFOs_11.Fill(pt)
                                 hEnergyRatioPFOs_11.Fill(E_ratio)
+                                # hNHitsPFOs_11.Fill(n_hits)
 
                             elif pfo_type == 13:
                                 hEnergyPFOs_13.Fill(E)
                                 hPtPFOs_13.Fill(pt)
                                 hEnergyRatioPFOs_13.Fill(E_ratio)
+                                # hNHitsPFOs_13.Fill(n_hits)
                                     
                             elif pfo_type == 22:
                                 hEnergyPFOs_22.Fill(E)
                                 hPtPFOs_22.Fill(pt)
                                 hEnergyRatioPFOs_22.Fill(E_ratio)
+                                # hNHitsPFOs_22.Fill(n_hits)
                                     
                             elif pfo_type == 211:
                                 hEnergyPFOs_211.Fill(E)
                                 hPtPFOs_211.Fill(pt)
                                 hEnergyRatioPFOs_211.Fill(E_ratio)
+                                # hNHitsPFOs_211.Fill(n_hits)
                                     
                             elif pfo_type == 2112:
                                 hEnergyPFOs_2112.Fill(E)
                                 hPtPFOs_2112.Fill(pt)
                                 hEnergyRatioPFOs_2112.Fill(E_ratio)
+                                # hNHitsPFOs_2112.Fill(n_hits)
 
                             charge = pfo.getCharge()
                             if charge != 0:
@@ -321,6 +356,26 @@ for n, decay_mode in enumerate(decay_modes):
                             pt = math.sqrt(px**2 + py**2)
                             p = math.sqrt(pt**2 + pz**2)
 
+                            '''
+                            n_calo_hits = 0
+                            n_trkr_hits = 0
+
+                            clusters = pfo.getClusters()
+                            for cluster in clusters:
+                                if cluster is None:
+                                    continue
+                                calo_hits = cluster.getCalorimeterHits()
+                                n_calo_hits += len(calo_hits)
+                                
+                            if (pfo.getCharge() != 0):
+                                tracks = pfo.getTracks()
+                                for track in tracks:
+                                    trkr_hits = track.getTrackerHits()
+                                    n_trker_hits += len(trkr_hits)
+
+                            n_hits = n_calo_hits + n_trkr_hits
+                            '''
+                            
                             if str(pfo_type) in pfo_types:
                                 pfo_types[str(pfo_type)] += 1
                             else:
@@ -329,28 +384,33 @@ for n, decay_mode in enumerate(decay_modes):
                             if pfo_type == 11:
                                 hEnergyPFOs_11.Fill(E)
                                 hPtPFOs_11.Fill(pt)
-                                hEnergyRatioPFOs_11.Fill(E_ratio) 
+                                hEnergyRatioPFOs_11.Fill(E_ratio)
+                                # hNHitsPFOs_11.Fill(n_hit)
 
                             elif pfo_type == 13:
                                 hEnergyPFOs_13.Fill(E)
                                 hPtPFOs_13.Fill(pt)
                                 hEnergyRatioPFOs_13.Fill(E_ratio)
+                                # hNHitsPFOs_13.Fill(n_hit)
                                 
                             elif pfo_type == 22:
                                 hEnergyPFOs_22.Fill(E)
                                 hPtPFOs_22.Fill(pt)
                                 hEnergyRatioPFOs_22.Fill(E_ratio)
-                                    
+                                # hNHitsPFOs_22.Fill(n_hit)
+                                
                             elif pfo_type == 211:
                                 hEnergyPFOs_211.Fill(E)
                                 hPtPFOs_211.Fill(pt)
                                 hEnergyRatioPFOs_211.Fill(E_ratio)
-                                    
+                                # hNHitsPFOs_211.Fill(n_hit)
+                                
                             elif pfo_type == 2112:
                                 hEnergyPFOs_2112.Fill(E)
                                 hPtPFOs_2112.Fill(pt)
                                 hEnergyRatioPFOs_2112.Fill(E_ratio)
-
+                                # hNHitsPFOs_2112.Fill(n_hit)
+                                
                             charge = pfo.getCharge()
                             if charge != 0:
                                 tracks = pfo.getTracks()
@@ -396,6 +456,26 @@ for n, decay_mode in enumerate(decay_modes):
                             pt = math.sqrt(px**2 + py**2)
                             p = math.sqrt(pt**2 + pz**2)
 
+                            ''' 
+                            n_calo_hits = 0
+                            n_trkr_hits = 0
+
+                            clusters = pfo.getClusters()
+                            for cluster in clusters:
+                                if cluster is None:
+                                    continue
+                                calo_hits = cluster.getCalorimeterHits()
+                                n_calo_hits += len(calo_hits)
+                                
+                            if (pfo.getCharge() != 0):
+                                tracks = pfo.getTracks()
+                                for track in tracks:
+                                    trkr_hits = track.getTrackerHits()
+                                    n_trker_hits += len(trkr_hits)
+
+                            n_hits = n_calo_hits + n_trkr_hits
+                            '''
+                            
                             if str(pfo_type) in pfo_types:
                                 pfo_types[str(pfo_type)] += 1
                             else:
@@ -405,27 +485,32 @@ for n, decay_mode in enumerate(decay_modes):
                                 hEnergyPFOs_11.Fill(E)
                                 hPtPFOs_11.Fill(pt)
                                 hEnergyRatioPFOs_11.Fill(E_ratio)
+                                # hNHitsPFOs_11.Fill(n_hits)
 
                             elif pfo_type == 13:
                                 hEnergyPFOs_13.Fill(E)
                                 hPtPFOs_13.Fill(pt)
                                 hEnergyRatioPFOs_13.Fill(E_ratio)
+                                # hNHitsPFOs_13.Fill(n_hits)
                                 
                             elif pfo_type == 22:
                                 hEnergyPFOs_22.Fill(E)
                                 hPtPFOs_22.Fill(pt)
                                 hEnergyRatioPFOs_22.Fill(E_ratio)
-
+                                # hNHitsPFOs_22.Fill(n_hits)
+                                
                             elif pfo_type == 211:
                                 hEnergyPFOs_211.Fill(E)
                                 hPtPFOs_211.Fill(pt)
                                 hEnergyRatioPFOs_211.Fill(E_ratio)
-
+                                # hNHitsPFOs_211.Fill(n_hits)
+                                
                             elif pfo_type == 2112:
                                 hEnergyPFOs_2112.Fill(E)
                                 hPtPFOs_2112.Fill(pt)
                                 hEnergyRatioPFOs_2112.Fill(E_ratio)
-
+                                # hNHitsPFOs_2112.Fill(n_hits)
+                                
                             charge = pfo.getCharge()
                             if charge != 0:
                                 tracks = pfo.getTracks()
@@ -480,31 +565,56 @@ for n, decay_mode in enumerate(decay_modes):
                             pt = math.sqrt(px**2 + py**2)
                             p = math.sqrt(pt**2 + pz**2)
 
+                            '''
+                            n_calo_hits = 0
+                            n_trkr_hits = 0
+
+                            clusters = pfo.getClusters()
+                            for cluster in clusters:
+                                if cluster is None:
+                                    continue
+                                calo_hits = cluster.getCalorimeterHits()
+                                n_calo_hits += len(calo_hits)
+                                
+                            if (pfo.getCharge() != 0):
+                                tracks = pfo.getTracks()
+                                for track in tracks:
+                                    trkr_hits = track.getTrackerHits()
+                                    n_trker_hits += len(trkr_hits)
+
+                            n_hits = n_calo_hits + n_trkr_hits
+                            '''
+                            
                             if pfo_type == 11:
                                 hEnergyPFOs_11.Fill(E)
                                 hPtPFOs_11.Fill(pt)
                                 hEnergyRatioPFOs_11.Fill(E_ratio)
+                                # hNHitsPFOs_11.Fill(n_hits)
 
                             elif pfo_type == 13:
                                 hEnergyPFOs_13.Fill(E)
                                 hPtPFOs_13.Fill(pt)
                                 hEnergyRatioPFOs_13.Fill(E_ratio)
+                                # hNHitsPFOs_13.Fill(n_hits)
                                 
                             elif pfo_type == 22:
                                 hEnergyPFOs_22.Fill(E)
                                 hPtPFOs_22.Fill(pt)
                                 hEnergyRatioPFOs_22.Fill(E_ratio)
+                                # hNHitsPFOs_22.Fill(n_hits)
                                 
                             elif pfo_type == 211:
                                 hEnergyPFOs_211.Fill(E)
                                 hPtPFOs_211.Fill(pt)
                                 hEnergyRatioPFOs_211.Fill(E_ratio)
-
+                                # hNHitsPFOs_211.Fill(n_hits)
+                                
                             elif pfo_type == 2112:
                                 hEnergyPFOs_2112.Fill(E)
                                 hPtPFOs_2112.Fill(pt)
                                 hEnergyRatioPFOs_2112.Fill(E_ratio)
-
+                                # hNHitsPFOs_2112.Fill(n_hits)
+                                
                             charge = pfo.getCharge()
                             if charge != 0:
                                 tracks = pfo.getTracks()

@@ -53,31 +53,28 @@ for file in to_process:
         # Instantiate relation navigators to parse tauReco and RecoMC links
         relationNavigatorTau = UTIL.LCRelationNavigator(tauRecoLink)
         relationNavigatorRecoMC = UTIL.LCRelationNavigator(recoMCLink)
-
+        
         # Reco taus that passed
         for tau in taus:
 
             # Get true label
             true_tau = getLinkedMCTau(tau, relationNavigatorTau, relationNavigatorRecoMC)
             true_decay_mode = getDecayMode(true_tau)
-            if (true_decay_mode != 0 and true_decay_mode != 4):
-                continue
-
             if (true_decay_mode == 0):
                 true_tau_label.append(1)
             elif (true_decay_mode == 4):
                 true_tau_label.append(3)
 
             # Get reco label
-            pfos = tau.getParticles()
-            n_pis = 0
-            for pfo in pfos:
-                if (abs(pfo.getType()) == 211):
-                    n_pis += 1
-            reco_tau_label.append(n_pis)
-            if n_pis == 6:
-                print(f'6 RECO PIONS! Event Number: {event.getEventNumber()}')
+            if (decay_mode == 0 or decay_mode == 4):
+                pfos = tau.getParticles()
+                n_pis = 0
+                for pfo in pfos:
+                    if (abs(pfo.getType()) == 211):
+                        n_pis += 1
+                reco_tau_label.append(n_pis)
                 
+        '''
         # Reco taus that failed number of charged tracks
         for tau_nchargedtrks in taus_nchargedtrks:
 
@@ -86,8 +83,7 @@ for file in to_process:
             true_decay_mode = getDecayMode(true_tau)
             if (true_decay_mode != 0 and true_decay_mode != 4):
                 continue
-            
-            if (true_decay_mode == 0):
+            elif (true_decay_mode == 0):
                 true_tau_label.append(1)
             elif (true_decay_mode == 4):
                 true_tau_label.append(3)
@@ -99,8 +95,6 @@ for file in to_process:
                 if (abs(pfo.getType()) == 211):
                     n_pis += 1
             reco_tau_label.append(n_pis)
-            if n_pis == 6:
-                print(f'6 RECO PIONS! Event Number: {event.getEventNumber()}')
             
         # Reco taus that failed invariant mass
         for tau_invmass in taus_invmass:
@@ -110,8 +104,7 @@ for file in to_process:
             true_decay_mode = getDecayMode(true_tau)
             if (true_decay_mode != 0 and true_decay_mode != 4):
                 continue
-            
-            if (true_decay_mode == 0):
+            elif (true_decay_mode == 0):
                 true_tau_label.append(1)
             elif (true_decay_mode == 4):
                 true_tau_label.append(3)
@@ -123,8 +116,6 @@ for file in to_process:
                 if (abs(pfo.getType()) == 211):
                     n_pis += 1
             reco_tau_label.append(n_pis)
-            if n_pis == 6:
-                print(f'6 RECO PIONS! Event Number: {event.getEventNumber()}')
 
         # Reco taus that failed merge
         for tau_merge in taus_merge:
@@ -134,8 +125,7 @@ for file in to_process:
             true_decay_mode = getDecayMode(true_tau)
             if (true_decay_mode != 0 and true_decay_mode != 4):
                 continue
-            
-            if (true_decay_mode == 0):
+            elif (true_decay_mode == 0):
                 true_tau_label.append(1)
             elif (true_decay_mode == 4):
                 true_tau_label.append(3)
@@ -147,8 +137,6 @@ for file in to_process:
                 if (abs(pfo.getType()) == 211):
                     n_pis += 1
             reco_tau_label.append(n_pis)
-            if n_pis == 6:
-                print(f'6 RECO PIONS! Event Number: {event.getEventNumber()}')
 
         # Reco taus that failed number of particles
         for tau_nparticles in taus_nparticles:
@@ -158,8 +146,7 @@ for file in to_process:
             true_decay_mode = getDecayMode(true_tau)
             if (true_decay_mode != 0 and true_decay_mode != 4):
                 continue
-            
-            if (true_decay_mode == 0):
+            elif (true_decay_mode == 0):
                 true_tau_label.append(1)
             elif (true_decay_mode == 4):
                 true_tau_label.append(3)
@@ -171,8 +158,6 @@ for file in to_process:
                 if (abs(pfo.getType()) == 211):
                     n_pis += 1
             reco_tau_label.append(n_pis)
-            if n_pis == 6:
-                print(f'6 RECO PIONS! Event Number: {event.getEventNumber()}')
 
         # Reco taus that failed isolation energy
         for tau_isoenergy in taus_isoenergy:
@@ -182,8 +167,7 @@ for file in to_process:
             true_decay_mode = getDecayMode(true_tau)
             if (true_decay_mode != 0 and true_decay_mode != 4):
                 continue
-
-            if (true_decay_mode == 0):
+            elif (true_decay_mode == 0):
                 true_tau_label.append(1)
             elif (true_decay_mode == 4):
                 true_tau_label.append(3)
@@ -195,8 +179,7 @@ for file in to_process:
                 if (abs(pfo.getType()) == 211):
                     n_pis += 1
             reco_tau_label.append(n_pis)
-            if n_pis == 6:
-                print(f'6 RECO PIONS! Event Number: {event.getEventNumber()}')
+        '''
 
     # Close file
     reader.close()

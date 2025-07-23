@@ -17,7 +17,7 @@ SIM.enableG4Gun = False
 SIM.enableGun = False
 
 ## InputFiles for simulation .stdhep, .slcio, .HEPEvt, .hepevt, .hepmc files are supported
-SIM.inputFiles = "output_gen.slcio" #generated from lcio_tau_gun.py
+SIM.inputFiles = "gen_output.slcio" #generated from lcio_tau_gun.py
 
 ## Macro file to execute for runType 'run' or 'vis'
 SIM.macroFile = []
@@ -26,7 +26,7 @@ SIM.macroFile = []
 SIM.numberOfEvents = -1
 
 ## Outputfile from the simulation,only lcio output is supported
-SIM.outputFile = "output_sim.slcio"
+SIM.outputFile = "sim_output.slcio"
 
 ## Verbosity use integers from 1 (most) to 7 (least) verbose
 ## or strings: VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS
@@ -49,7 +49,7 @@ SIM.steeringFile = None
 SIM.vertexOffset = [0.0, 0.0, 0.0, 0.0]
 
 ## FourVector of the Sigma for the Smearing of the Vertex position: x y z t
-SIM.vertexSigma = [0.001 * mm, 0.001 * mm, 0.001 * mm, 0.001 * mm]
+SIM.vertexSigma = [0.0, 0.0, 0.0, 0.0]
 
 
 ################################################################################
@@ -152,9 +152,8 @@ SIM.filter.tracker = "edep1kev"
 ## 
 ##     Setting a distribution will set isotrop = True
 ##     
-# SIM.gun.distribution = "uniform"
-# tauEnergy = random.rand()*195+5 ## draw random number on [0,1] and shift to [5,200]
-# SIM.gun.energy = 10*GeV # tauEnergy*GeV
+SIM.gun.distribution = "uniform"
+SIM.gun.energy = 10.0*GeV
 
 ##  isotropic distribution for the particle gun
 ## 
@@ -162,20 +161,20 @@ SIM.filter.tracker = "edep1kev"
 ##     if one of these options is not None the random distribution will be set to True and cannot be turned off!
 ##     
 
-# SIM.gun.isotrop = True
-# SIM.gun.multiplicity = 1
-# SIM.gun.particle = "tau-"
+SIM.gun.isotrop = True
+SIM.gun.multiplicity = 1
+SIM.gun.particle = "tau-"
 
 ## Azimuthal angle for random distribution
-# SIM.gun.phiMax = None
-# SIM.gun.phiMin = None
+SIM.gun.phiMax = None
+SIM.gun.phiMin = None
 
 # Polar angle for random distribution
-# SIM.gun.thetaMax = 170*deg
-# SIM.gun.thetaMin = 10*deg
+SIM.gun.thetaMax = 172*deg
+SIM.gun.thetaMin = 8*deg
 
 ##  position of the particle gun, 3 vector 
-# SIM.gun.position = (0.0, 0.0, 0.0)
+SIM.gun.position = (0.0, 0.0, 0.0)
 
 ################################################################################
 ## Configuration for the output levels of DDG4 components 
@@ -203,10 +202,10 @@ SIM.part.keepAllParticles = False
 
 ## Minimal distance between particle vertex and endpoint of parent after
 ## which the vertexIsNotEndpointOfParent flag is set
-SIM.part.minDistToParentVertex = 2.2e-20
+SIM.part.minDistToParentVertex = 2.2e-14
 
 ## MinimalKineticEnergy to store particles created in the tracking region
-SIM.part.minimalKineticEnergy = 0.01*MeV
+SIM.part.minimalKineticEnergy = 1.0*MeV
 
 ##  Printout at End of Tracking 
 SIM.part.printEndTracking = True

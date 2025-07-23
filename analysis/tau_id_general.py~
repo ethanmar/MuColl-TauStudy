@@ -1,0 +1,77 @@
+from pyLCIO import IOIMPL, EVENT, UTIL
+from argparse import ArgumentParser
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+from tau_mc_link import getDecayMode, getLinkedMCTau
+
+# Command line arguments
+parser = ArgumentParser()
+
+# Input file
+parser.add_argument('--inputFile', type=str, default='output_taufinder.slcio')
+
+args = parser.parse_args()
+
+# Check if input file is a directory or a single file    
+to_process = []
+
+if os.path.isdir(args.inputFile):
+    for r, d, f in os.walk(args.inputFile):
+        for file in f:
+            to_process.append(os.path.join(r, file))
+else:
+    to_process.append(args.inputFile)
+
+# Keep track of true tau label
+true_tau_label = []
+
+# Keep track of reco tau label
+reco_tau_label = []
+
+# Open input file(s)
+for file in to_process:
+    reader = IOIMPL.LCFactory.getInstance().createLCReader()
+    reader.open(file)
+
+    # Loop through events
+    for ievt, event in enumerate(reader):
+
+        # Get collections
+        pfos = event.getCollection('PandoraPFOs')
+        mcParticles = event.getCollection('MCParticle')
+
+        for mcParticle in mcParticles:
+            if (abs(mcParticle.getPDG()) == 15):
+                decay_mode = getDecayMode(mcParticle)
+
+        if (decay_mode != 0 and decay_mode != 4):
+            continue
+        
+        n_pis_true = 0
+        n_pis_reco = 0
+        
+        for mcParticle in mcParticles:
+            if (abs(mcParticle.getPDG()) == 211):
+                n_pis_true += 1
+                
+        if (n_pis_true > 3):
+            pring(f'Event {event.getEventNumber()} has greater than 3 true charged pions!')
+                
+        for pfo in pfos:
+            if (abs(pfo.getType()) == 211):
+                n_pis_reco += 1
+
+        true_tau_label.append(n_pis_true)
+        reco_tau_label.append(n_pis_reco)
+
+    reader.close()
+
+disp = ConfusionMatrixDisplay.from_predictions(reco_tau_label, true_tau_label, normalize='pred', include_values=True, cmap='Blues', colorbar=True)
+disp.ax_.set_ylabel(r'Number of Reconstructed $\pi^\pm$s (0 $\pi^0$s)', fontsize=12)
+disp.ax_.set_xlabel(r'Number of True $\pi^\pm$s (0 $\pi^0$s)', fontsize=12)
+disp.ax_.invert_yaxis()
+plt.tight_layout()
+plt.savefig('tau_id_confusion.png')

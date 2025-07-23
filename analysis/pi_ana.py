@@ -6,8 +6,19 @@ from array import array
 import os
 import fnmatch
 import numpy as np
+import matplotlib.pyplot as plt
 
 from tau_mc_link import getLinkedMCTau, getVisibleProperties, getDecayMode, getNRecoQPis
+
+def getEta(mom):
+
+    p = math.sqrt(mom[0]**2 + mom[1]**2 + mom[2]**2)
+    pz = mom[2]
+    theta = math.acos(pz/p)
+    return -math.log(math.tan(theta/2))
+    
+def getPhi(mom):
+    return math.atan2(mom[1], mom[0])
 
 # Command line arguments
 parser = ArgumentParser()
@@ -31,6 +42,38 @@ hPiMaxConeReco = TH1F('reco_pi_max_angle', 'Reconstructed Maximum Search Cone An
 hPiMaxConeReco.GetXaxis().SetTitle('#theta_{max} [rad]')
 hists.append(hPiMaxConeReco)
 
+hPiPtTrue1P0N = TH1F('true_pi_pt_1p0n', 'True 1P0N Pion Pt', 100, 0, 320)
+hists.append(hPiPtTrue1P0N)
+
+hPiPtReco1P0N = TH1F('reco_pi_pt_1p0n', 'Reco 1P0N Pion Pt', 100, 0, 2000)
+hists.append(hPiPtReco1P0N)
+
+hPiPtTrue3P0N = TH1F('true_pi_pt_3p0n', 'True 3P0N Pion Pt', 100, 0, 320)
+hists.append(hPiPtTrue3P0N)
+
+hPiPtReco3P0N = TH1F('reco_pi_pt_3p0n', 'Reco 3P0N Pion Pt', 100, 0, 500)
+hists.append(hPiPtReco3P0N)
+
+hPiEtaRatio1P0N = TH1F('pi_eta_ratio_1p0n', '1P0N Pion Eta Ratio', 100, 0, 2.5)
+hists.append(hPiEtaRatio1P0N)
+
+hPiPhiRatio1P0N = TH1F('pi_phi_ratio_1p0n', '1P0N Pion Phi Ratio', 100, 0, 2)
+hists.append(hPiPhiRatio1P0N)
+
+hNTruePis1P0N = TH1F('n_true_pis_1p0n', 'Number of True Pions (1P0N)', 65, 0, 65)
+hists.append(hNTruePis1P0N)
+
+hNTruePis3P0N = TH1F('n_true_pis_3p0n', 'Number of True Pions (3P0N)', 65, 0, 65)
+hists.append(hNTruePis3P0N)
+
+# Keep track of max cone angles
+pi_max_cone_reco = []
+pi_max_cone_true = []
+
+# Keep track of seed pt
+pi_seed_pt_reco = []
+pi_seed_pt_true = []
+
 # Detach histograms from file/directory
 for hist in hists:
     hist.SetDirectory(0)
@@ -45,6 +88,8 @@ if os.path.isdir(args.inputFile):
 else:
     to_process.append(args.inputFile)
 
+n_big_pt = 0
+    
 # Open input file(s)
 for file in to_process:
     reader = IOIMPL.LCFactory.getInstance().createLCReader()
@@ -67,6 +112,67 @@ for file in to_process:
                 # Get tau decay mode
                 decayMode = getDecayMode(mcParticle)
 
+                if decayMode == 0:
+                    daughters = mcParticle.getDaughters()
+                    energy_max = 0
+                    for daughter in daughters:
+                        if (abs(daughter.getPDG()) == 211):
+                            mom = daughter.getMomentum()
+                            pt = math.sqrt(mom[0]**2 + mom[1]**2)
+                            hPiPtTrue1P0N.Fill(pt)
+                            energy = daughter.getEnergy()
+                            if energy > energy_max:
+                                energy_max = energy
+                                eta_true = getEta(mom)
+                                phi_true = getPhi(mom)
+
+                    energy_max = 0
+                    for pfo in pfos:
+                        if (abs(pfo.getType()) == 211):
+                            mom = pfo.getMomentum()
+                            pt = math.sqrt(mom[0]**2 + mom[1]**2)
+                            hPiPtReco1P0N.Fill(pt)
+                            energy = pfo.getEnergy()
+                            if energy > energy_max:
+                                energy_max = energy
+                                eta_reco = getEta(mom)
+                                phi_reco = getPhi(mom)
+
+                    eta_ratio = eta_reco/eta_true
+                    phi_ratio = phi_reco/phi_true
+
+                    hPiEtaRatio1P0N.Fill(eta_ratio)
+                    hPiPhiRatio1P0N.Fill(phi_ratio)
+
+                    n_pis_true_1p0n = 0
+                    for mc_particle in mcParticles:
+                        if (abs(mc_particle.getPDG()) == 211):
+                            n_pis_true_1p0n += 1
+                    hNTruePis1P0N.Fill(n_pis_true_1p0n)
+                    
+
+                if decayMode == 4:
+                    daughters = mcParticle.getDaughters()
+                    for daughter in daughters:
+                        if (abs(daughter.getPDG()) == 211):
+                            mom = daughter.getMomentum()
+                            pt = math.sqrt(mom[0]**2 + mom[1]**2)
+                            hPiPtTrue3P0N.Fill(pt)
+
+                    for pfo in pfos:
+                        if (abs(pfo.getType()) == 211):
+                            mom = pfo.getMomentum()
+                            pt = math.sqrt(mom[0]**2 + mom[1]**2)
+                            hPiPtReco3P0N.Fill(pt)
+                            if pt > 500:
+                                n_big_pt += 1
+
+                    n_pis_true_3p0n = 0
+                    for mc_particle in mcParticles:
+                        if (abs(mc_particle.getPDG()) == 211):
+                            n_pis_true_3p0n += 1
+                    hNTruePis3P0N.Fill(n_pis_true_3p0n)
+
                 if decayMode == 4:
 
                     pis = []
@@ -84,6 +190,8 @@ for file in to_process:
                                 pt_seed = pt
                                 pi_seed = pi
 
+                        pi_seed_pt_reco.append(pt_seed)
+
                         px_seed = pi_seed.getMomentum()[0]
                         py_seed = pi_seed.getMomentum()[1]
                         pz_seed = pi_seed.getMomentum()[2]
@@ -99,6 +207,7 @@ for file in to_process:
                                 max_angle_reco = angle
 
                         hPiMaxConeReco.Fill(max_angle_reco)
+                        pi_max_cone_reco.append(max_angle_reco)
                             
                     pis_true = []
                     daughters = mcParticle.getDaughters()
@@ -116,6 +225,8 @@ for file in to_process:
                                 pt_seed = pt
                                 pi_seed = pi_true
 
+                        pi_seed_pt_true.append(pt_seed)
+
                         px_seed = pi_seed.getMomentum()[0]
                         py_seed = pi_seed.getMomentum()[1]
                         pz_seed = pi_seed.getMomentum()[2]
@@ -131,9 +242,40 @@ for file in to_process:
                                 max_angle_true = angle
 
                         hPiMaxConeTrue.Fill(max_angle_true)
+                        pi_max_cone_true.append(max_angle_true)
 
     # Close file
     reader.close()
+
+print(f'Number of 3P0N pions with pt > 500: {n_big_pt}')
+
+plt.figure()
+
+plt.clf()
+plt.scatter(pi_seed_pt_reco, pi_max_cone_reco, c='blue')
+plt.xlim(0, 250)
+plt.xlabel('Reco Seed Pt [GeV/c]')
+plt.ylabel('Reco Max Angle [rad]')
+plt.savefig('seed_cone_reco_250.png')
+
+plt.clf()
+plt.scatter(pi_seed_pt_reco, pi_max_cone_reco, c='blue')
+plt.xlim(0, 2000)
+plt.xlabel('Reco Seed Pt [GeV/c]')
+plt.ylabel('Reco Max Angle [rad]')
+plt.savefig('seed_cone_reco_2000.png')
+
+plt.clf()
+plt.scatter(pi_seed_pt_reco, pi_max_cone_reco, c='blue')
+plt.xlabel('Reco Seed Pt [GeV/c]')
+plt.ylabel('Reco Max Angle [rad]')
+plt.savefig('seed_cone_reco_max.png')
+
+plt.clf()
+plt.scatter(pi_seed_pt_true, pi_max_cone_true, c='blue')
+plt.xlabel('True Seed Pt [GeV/c]')
+plt.ylabel('True Max Angle [rad]')
+plt.savefig('seed_cone_true.png')
     
 # Write to output file
 output_file = TFile(args.outputFile, 'RECREATE')

@@ -1,0 +1,735 @@
+from pyLCIO import IOIMPL, EVENT, UTIL
+from ROOT import TH1F, TFile, TCanvas
+import math
+from argparse import ArgumentParser
+from array import array
+import os
+import fnmatch
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+from tau_mc_link import getDecayMode
+
+def getVisibleProperties(mc_tau):
+
+    E_vis = 0
+    px_vis = 0
+    py_vis = 0
+    pz_vis = 0
+    
+    # Loop through mc daughters
+    mc_daughters = mc_tau.getDaughters()
+
+    for mc_daughter in mc_daughters:
+
+        # Ignore neutrinos
+        pdg = abs(mc_daughter.getPDG())
+        if (pdg == 12 or pdg == 14 or pdg == 16):
+            continue
+
+        # Sum visible observables
+        E_vis += mc_daughter.getEnergy()
+        px_vis += mc_daughter.getMomentum()[0]
+        py_vis += mc_daughter.getMomentum()[1]
+        pz_vis += mc_daughter.getMomentum()[2]
+
+    vis_properties = [E_vis, px_vis, py_vis, pz_vis]
+    return vis_properties
+
+def getPt(vis_props):
+    return math.sqrt(vis_props[1]**2 + vis_props[2]**2)
+
+def getP(vis_props):
+    return math.sqrt(vis_props[1]**2 + vis_props[2]**2 + vis_props[3]**2)
+
+def getTheta(vis_props):
+    p = getP(vis_props)
+    pz = vis_props[3]
+    return math.acos(pz/p)
+
+def getPhi(vis_props):
+    px = vis_props[1]
+    pt = getPt(vis_props)
+    return math.acos(px/pt)
+
+def getDetectorRegion(theta):
+    if (1.0 < theta and theta < 2.0):
+        return "Central Barrel"
+    elif ((0.577 < theta and theta < 1.0) or (2.0 < theta and theta < 2.56)):
+        return "Transition"
+    elif (theta < 0.577 or theta > 2.56):
+        return "Endcap"
+    else:
+        return "Other"
+
+def isTauDaughter(mc_pi):
+    parents = mc_pi.getParents()
+    for parent in parents:
+        if (abs(parent.getPDG()) == 15):
+            return True
+    return False
+
+def getNRecoPis(pfos, mc_particles, decay_mode):
+    unique_matched_mc_pis = []
+    duplicate_matched_mc_pis = []
+
+    # Loop over pfos
+    for pfo in pfos:
+
+        # Tag charged pions
+        if (abs(pfo.getType()) == 211):
+
+            # Get observables
+            pfo_mom = pfo.getMomentum()
+            pfo_px = pfo_mom[0]
+            pfo_py = pfo_mom[1]
+            pfo_pz = pfo_mom[2]
+            pfo_pt = math.sqrt(pfo_px**2 + pfo_py**2)
+            pfo_theta = math.atan2(pfo_pt, pfo_pz)
+            # pfo_eta = -math.log(math.tan(theta/2))
+            pfo_phi = math.atan2(pfo_py, pfo_px)
+            pfo_energy = pfo.getEnergy()
+
+            if decay_mode == 4:
+                print(f'\nNew charged pion pfo:')
+                print(f'Reco Pt: {pfo_pt:.2f}, Reco Energy: {pfo_energy:.2f}')
+            
+            # Loop over mc particles
+            deltaR_mc_pis = []
+            deltaRs = []
+            for mc_particle in mc_particles:
+
+                # Tag charged pions from tau decay
+                if (abs(mc_particle.getPDG()) == 211 and isTauDaughter(mc_particle)):
+                            
+                    # Get observables
+                    mc_mom = mc_particle.getMomentum()
+                    mc_px = mc_mom[0]
+                    mc_py = mc_mom[1]
+                    mc_pz = mc_mom[2]
+                    mc_pt = math.sqrt(mc_px**2 + mc_py**2)
+                    mc_theta = math.atan2(mc_pt, mc_pz)
+                    # mc_eta = -math.log(math.tan(theta/2))
+                    mc_phi = math.atan2(mc_py, mc_px)
+                    
+                    # Compute deltaR
+                    deltaTheta = pfo_theta - mc_theta
+                    deltaPhi = pfo_phi - mc_phi
+                    while (deltaPhi > math.pi):
+                        deltaPhi -= 2*math.pi
+                    while (deltaPhi < -math.pi):
+                        deltaPhi += 2*math.pi
+                    deltaR = math.sqrt(deltaTheta**2 + deltaPhi**2)
+                    
+                    # Save mc particle if deltaR is less than 0.1 rad
+                    if (deltaR < 0.1):
+                        deltaR_mc_pis.append(mc_particle)
+                        deltaRs.append(deltaR)
+                        
+            # Loop over mc particles with deltaR less than 0.1 rad
+            min_energy_dif = 1e6
+            matched_mc_pi = None
+            for deltaR_mc_pi, deltaR in zip(deltaR_mc_pis, deltaRs):
+                
+                # Compute energy resolution
+                mc_mom = deltaR_mc_pi.getMomentum()
+                mc_pt = math.sqrt(mc_mom[0]**2 + mc_mom[1]**2)
+                mc_energy = deltaR_mc_pi.getEnergy()
+                energy_dif = abs(pfo_energy - mc_energy)
+                if decay_mode == 4:
+                    print(f'True Pt: {mc_pt:.2f}, True Energy: {mc_energy:.2f}, DeltaR: {deltaR:.5f}, Energy Diff: {energy_dif:.2f}')
+
+                # Mc pi matched if it has smallest energy resolution
+                if (energy_dif < min_energy_dif):
+                    min_energy_dif = energy_dif
+                    matched_mc_pi = deltaR_mc_pi
+
+            if (matched_mc_pi is not None):
+                if (matched_mc_pi not in unique_matched_mc_pis):
+                    unique_matched_mc_pis.append(matched_mc_pi)
+                else:
+                    duplicate_matched_mc_pis.append(matched_mc_pi)
+
+    if decay_mode == 4:
+        print(f'Number of matched pis: {len(unique_matched_mc_pis) + len(duplicate_matched_mc_pis)}')
+
+    return len(unique_matched_mc_pis), len(duplicate_matched_mc_pis)
+    
+# Command line arguments
+parser = ArgumentParser()
+
+# Input file
+parser.add_argument('--inputFile', type=str, default='output_taufinder.slcio')
+
+# Output file
+parser.add_argument('--outputFile', type=str, default='pi_eff_custom.root')
+
+args = parser.parse_args()
+
+# Initialize histograms
+hists = []
+
+# 1P0N Pions
+hPiPtTrue1P0N = TH1F('1p0n_pi_true_pT', 'True 1P0N Pion Pt', 10, 0, 320)
+hists.append(hPiPtTrue1P0N)
+
+hPiPhiTrue1P0N = TH1F('1p0n_pi_true_phi', 'True 1P0N Pion Phi', 10, 0, math.pi)
+hists.append(hPiPhiTrue1P0N)
+
+hPiThetaTrue1P0N = TH1F('1p0n_pi_true_theta', 'True 1P0N Pion Theta', 10, 0, math.pi)
+hists.append(hPiThetaTrue1P0N)
+
+hPiPtMatched1P0N = TH1F('1p0n_pi_matched_pT', 'Matched 1P0N Pion Pt', 10, 0, 320)
+hists.append(hPiPtMatched1P0N)
+
+hPiPhiMatched1P0N = TH1F('1p0n_pi_matched_phi', 'Matched 1P0N Pion Phi', 10, 0, math.pi)
+hists.append(hPiPhiMatched1P0N)
+
+hPiThetaMatched1P0N = TH1F('1p0n_pi_matched_theta', 'Matched 1P0N Pion Theta', 10, 0, math.pi)
+hists.append(hPiThetaMatched1P0N)
+
+hPiPtTrue1P0N_Barrel = TH1F('1p0n_pi_true_pT_barrel', 'True 1P0N Pion Pt (Barrel)', 10, 0, 320)
+hists.append(hPiPtTrue1P0N_Barrel)
+
+hPiPhiTrue1P0N_Barrel = TH1F('1p0n_pi_true_phi_barrel', 'True 1P0N Pion Phi (Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiTrue1P0N_Barrel)
+
+hPiPtMatched1P0N_Barrel = TH1F('1p0n_pi_matched_pT_barrel', 'Matched 1P0N Pion Pt (Barrel)', 10, 0, 320)
+hists.append(hPiPtMatched1P0N_Barrel)
+
+hPiPhiMatched1P0N_Barrel = TH1F('1p0n_pi_matched_phi_barrel', 'Matched 1P0N Pion Phi (Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiMatched1P0N_Barrel)
+
+hPiPtTrue1P0N_CentBarrel = TH1F('1p0n_pi_true_pT_centbarrel', 'True 1P0N Pion Pt (Central Barrel)', 10, 0, 320)
+hists.append(hPiPtTrue1P0N_CentBarrel)
+
+hPiPhiTrue1P0N_CentBarrel = TH1F('1p0n_pi_true_phi_centbarrel', 'True 1P0N Pion Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiTrue1P0N_CentBarrel)
+
+hPiPtMatched1P0N_CentBarrel = TH1F('1p0n_pi_matched_pT_centbarrel', 'Matched 1P0N Pion Pt (Central Barrel)', 10, 0, 320)
+hists.append(hPiPtMatched1P0N_CentBarrel)
+
+hPiPhiMatched1P0N_CentBarrel = TH1F('1p0n_pi_matched_phi_centbarrel', 'Matched 1P0N Pion Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiMatched1P0N_CentBarrel)
+
+hPiPtTrue1P0N_Endcap = TH1F('1p0n_pi_true_pT_endcap', 'True 1P0N Pion Pt (Endcap)', 10, 0, 320)
+hists.append(hPiPtTrue1P0N_Endcap)
+
+hPiPhiTrue1P0N_Endcap = TH1F('1p0n_pi_true_phi_endcap', 'True 1P0N Pion Phi (Endcap)', 10, 0, math.pi)
+hists.append(hPiPhiTrue1P0N_Endcap)
+
+hPiPtMatched1P0N_Endcap = TH1F('1p0n_pi_matched_pT_endcap', 'Matched 1P0N Pion Pt (Endcap)', 10, 0, 320)
+hists.append(hPiPtMatched1P0N_Endcap)
+
+hPiPhiMatched1P0N_Endcap = TH1F('1p0n_pi_matched_phi_endcap', 'Matched 1P0N Pion Phi (Endcap)', 10, 0, math.pi)
+hists.append(hPiPhiMatched1P0N_Endcap)
+
+hPiPtTrue1P0N_Transition = TH1F('1p0n_pi_true_pT_transition', 'True 1P0N Pion Pt (Transition)', 10, 0, 320)
+hists.append(hPiPtTrue1P0N_Transition)
+
+hPiPhiTrue1P0N_Transition = TH1F('1p0n_pi_true_phi_transition', 'True 1P0N Pion Phi (Transition)', 10, 0, math.pi)
+hists.append(hPiPhiTrue1P0N_Transition)
+
+hPiPtMatched1P0N_Transition = TH1F('1p0n_pi_matched_pT_transition', 'Matched 1P0N Pion Pt (Transition)', 10, 0, 320)
+hists.append(hPiPtMatched1P0N_Transition)
+
+hPiPhiMatched1P0N_Transition = TH1F('1p0n_pi_matched_phi_transition', 'Matched 1P0N Pion Phi (Transition)', 10, 0, math.pi)
+hists.append(hPiPhiMatched1P0N_Transition)
+
+# 3P0N Pions
+hPiPtTrue3P0N = TH1F('3p0n_pi_true_pT', 'True 3P0N Pion Pt', 10, 0, 320)
+hists.append(hPiPtTrue3P0N)
+
+hPiPhiTrue3P0N = TH1F('3p0n_pi_true_phi', 'True 3P0N Pion Phi', 10, 0, math.pi)
+hists.append(hPiPhiTrue3P0N)
+
+hPiThetaTrue3P0N = TH1F('3p0n_pi_true_theta', 'True 3P0N Pion Theta', 10, 0, math.pi)
+hists.append(hPiThetaTrue3P0N)
+
+hPiPtMatched3P0N = TH1F('3p0n_pi_matched_pT', 'Matched 3P0N Pion Pt', 10, 0, 320)
+hists.append(hPiPtMatched3P0N)
+
+hPiPhiMatched3P0N = TH1F('3p0n_pi_matched_phi', 'Matched 3P0N Pion Phi', 10, 0, math.pi)
+hists.append(hPiPhiMatched3P0N)
+
+hPiThetaMatched3P0N = TH1F('3p0n_pi_matched_theta', 'Matched 3P0N Pion Theta', 10, 0, math.pi)
+hists.append(hPiThetaMatched3P0N)
+
+hPiPtTrue3P0N_Barrel = TH1F('3p0n_pi_true_pT_barrel', 'True 3P0N Pion Pt (Barrel)', 10, 0, 320)
+hists.append(hPiPtTrue3P0N_Barrel)
+
+hPiPhiTrue3P0N_Barrel = TH1F('3p0n_pi_true_phi_barrel', 'True 3P0N Pion Phi (Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiTrue3P0N_Barrel)
+
+hPiPtMatched3P0N_Barrel = TH1F('3p0n_pi_matched_pT_barrel', 'Matched 3P0N Pion Pt (Barrel)', 10, 0, 320)
+hists.append(hPiPtMatched3P0N_Barrel)
+
+hPiPhiMatched3P0N_Barrel = TH1F('3p0n_pi_matched_phi_barrel', 'Matched 3P0N Pion Phi (Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiMatched3P0N_Barrel)
+
+hPiPtTrue3P0N_CentBarrel = TH1F('3p0n_pi_true_pT_centbarrel', 'True 3P0N Pion Pt (Central Barrel)', 10, 0, 320)
+hists.append(hPiPtTrue3P0N_CentBarrel)
+
+hPiPhiTrue3P0N_CentBarrel = TH1F('3p0n_pi_true_phi_centbarrel', 'True 3P0N Pion Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiTrue3P0N_CentBarrel)
+
+hPiPtMatched3P0N_CentBarrel = TH1F('3p0n_pi_matched_pT_centbarrel', 'Matched 3P0N Pion Pt (Central Barrel)', 10, 0, 320)
+hists.append(hPiPtMatched3P0N_CentBarrel)
+
+hPiPhiMatched3P0N_CentBarrel = TH1F('3p0n_pi_matched_phi_centbarrel', 'Matched 3P0N Pion Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hPiPhiMatched3P0N_CentBarrel)
+
+hPiPtTrue3P0N_Endcap = TH1F('3p0n_pi_true_pT_endcap', 'True 3P0N Pion Pt (Endcap)', 10, 0, 320)
+hists.append(hPiPtTrue3P0N_Endcap)
+
+hPiPhiTrue3P0N_Endcap = TH1F('3p0n_pi_true_phi_endcap', 'True 3P0N Pion Phi (Endcap)', 10, 0, math.pi)
+hists.append(hPiPhiTrue3P0N_Endcap)
+
+hPiPtMatched3P0N_Endcap = TH1F('3p0n_pi_matched_pT_endcap', 'Matched 3P0N Pion Pt (Endcap)', 10, 0, 320)
+hists.append(hPiPtMatched3P0N_Endcap)
+
+hPiPhiMatched3P0N_Endcap = TH1F('3p0n_pi_matched_phi_endcap', 'Matched 3P0N Pion Phi (Endcap)', 10, 0, math.pi)
+hists.append(hPiPhiMatched3P0N_Endcap)
+
+hPiPtTrue3P0N_Transition = TH1F('3p0n_pi_true_pT_transition', 'True 3P0N Pion Pt (Transition)', 10, 0, 320)
+hists.append(hPiPtTrue3P0N_Transition)
+
+hPiPhiTrue3P0N_Transition = TH1F('3p0n_pi_true_phi_transition', 'True 3P0N Pion Phi (Transition)', 10, 0, math.pi)
+hists.append(hPiPhiTrue3P0N_Transition)
+
+hPiPtMatched3P0N_Transition = TH1F('3p0n_pi_matched_pT_transition', 'Matched 3P0N Pion Pt (Transition)', 10, 0, 320)
+hists.append(hPiPtMatched3P0N_Transition)
+
+hPiPhiMatched3P0N_Transition = TH1F('3p0n_pi_matched_phi_transition', 'Matched 3P0N Pion Phi (Transition)', 10, 0, math.pi)
+hists.append(hPiPhiMatched3P0N_Transition)
+
+# Detach histograms from file/directory
+for hist in hists:
+    hist.SetDirectory(0)
+
+# Check if input file is a directory or a single file    
+to_process = []
+
+if os.path.isdir(args.inputFile):
+    for r, d, f in os.walk(args.inputFile):
+        for file in f:
+            to_process.append(os.path.join(r, file))
+else:
+    to_process.append(args.inputFile)
+
+n_1p0n_true = 0
+n_1p0n_reco = 0
+n_3p0n_true = 0
+n_3p0n_reco = 0
+
+n_pi_true = []
+n_pi_reco = []
+n_pi_unique = []
+n_pi_duplicate = []
+
+# Open input file(s)
+for file in to_process:
+    reader = IOIMPL.LCFactory.getInstance().createLCReader()
+    reader.open(file)
+
+    # Loop through events
+    for ievt, event in enumerate(reader):
+
+        # Get collections
+        pfos = event.getCollection('PandoraPFOs')
+        mc_particles = event.getCollection('MCParticle')
+
+        # True decay mode
+        decay_mode = -1
+        
+        # Visible observables
+        vis_props = []
+        vis_pt = 0
+        vis_theta = 0
+        vis_phi = 0
+
+        # Loop through mc_particles
+        for mc_particle in mc_particles:
+
+            # Tag taus
+            if (abs(mc_particle.getPDG()) == 15):
+
+                # Get decay mode
+                decay_mode = getDecayMode(mc_particle)
+
+                # Get visible properties
+                vis_props = getVisibleProperties(mc_particle)
+                vis_pt = getPt(vis_props)
+                vis_theta = getTheta(vis_props)
+                vis_phi = getPhi(vis_props)                
+
+        if decay_mode == 0:
+            n_1p0n_true += 1
+            hPiPtTrue1P0N.Fill(vis_pt)
+            hPiThetaTrue1P0N.Fill(vis_theta)
+            hPiPhiTrue1P0N.Fill(vis_phi)
+
+            if (vis_theta > 0.70 and vis_theta < 2.45):
+                hPiPtTrue1P0N_Barrel.Fill(vis_pt)
+                hPiPhiTrue1P0N_Barrel.Fill(vis_phi)
+
+            if (vis_theta > 1 and vis_theta < 2):
+                hPiPtTrue1P0N_CentBarrel.Fill(vis_pt)
+                hPiPhiTrue1P0N_CentBarrel.Fill(vis_phi)
+
+            elif ((vis_theta > 0.577 and vis_theta < 1.0) or (vis_theta > 2.0 and vis_theta < 2.56)):
+                hPiPtTrue1P0N_Transition.Fill(vis_pt)
+                hPiPhiTrue1P0N_Transition.Fill(vis_phi)
+
+            elif (vis_theta < 0.577 or vis_theta > 2.56):
+                hPiPtTrue1P0N_Endcap.Fill(vis_pt)
+                hPiPhiTrue1P0N_Endcap.Fill(vis_phi)
+
+        elif decay_mode == 4:
+            n_3p0n_true += 1
+            hPiPtTrue3P0N.Fill(vis_pt)
+            hPiThetaTrue3P0N.Fill(vis_theta)
+            hPiPhiTrue3P0N.Fill(vis_phi)
+
+            if (vis_theta > 0.70 and vis_theta < 2.45):
+                hPiPtTrue3P0N_Barrel.Fill(vis_pt)
+                hPiPhiTrue3P0N_Barrel.Fill(vis_phi)
+
+            if (vis_theta > 1 and vis_theta < 2):
+                hPiPtTrue3P0N_CentBarrel.Fill(vis_pt)
+                hPiPhiTrue3P0N_CentBarrel.Fill(vis_phi)
+
+            elif ((vis_theta > 0.577 and vis_theta < 1.0) or (vis_theta > 2.0 and vis_theta < 2.56)):
+                hPiPtTrue3P0N_Transition.Fill(vis_pt)
+                hPiPhiTrue3P0N_Transition.Fill(vis_phi)
+
+            elif (vis_theta < 0.577 or vis_theta > 2.56):
+                hPiPtTrue3P0N_Endcap.Fill(vis_pt)
+                hPiPhiTrue3P0N_Endcap.Fill(vis_phi)
+
+        if decay_mode == 4:
+            print(f'\nEvent number: {event.getEventNumber()}')
+                
+        # Get number of matched pions
+        n_unique_pis, n_duplicate_pis = getNRecoPis(pfos, mc_particles, decay_mode)
+
+        if (decay_mode == 0 or decay_mode == 4):
+            n_pi_reco.append(n_unique_pis + n_duplicate_pis)
+            n_pi_unique.append(n_unique_pis)
+            n_pi_duplicate.append(n_duplicate_pis)
+            if (decay_mode == 0):
+                n_pi_true.append(1)
+            elif (decay_mode == 4):
+                n_pi_true.append(3)                
+                
+        if (n_unique_pis == 1 and n_duplicate_pis == 0 and decay_mode == 0):
+            n_1p0n_reco += 1
+            hPiPtMatched1P0N.Fill(vis_pt)
+            hPiThetaMatched1P0N.Fill(vis_theta)
+            hPiPhiMatched1P0N.Fill(vis_phi)
+
+            if (vis_theta > 0.70 and vis_theta < 2.45):
+                hPiPtMatched1P0N_Barrel.Fill(vis_pt)
+                hPiPhiMatched1P0N_Barrel.Fill(vis_phi)
+
+            if (vis_theta > 1 and vis_theta < 2):
+                hPiPtMatched1P0N_CentBarrel.Fill(vis_pt)
+                hPiPhiMatched1P0N_CentBarrel.Fill(vis_phi)
+
+            elif ((vis_theta > 0.577 and vis_theta < 1.0) or (vis_theta > 2.0 and vis_theta < 2.56)):
+                hPiPtMatched1P0N_Transition.Fill(vis_pt)
+                hPiPhiMatched1P0N_Transition.Fill(vis_phi)
+
+            elif (vis_theta < 0.577 or vis_theta > 2.56):
+                hPiPtMatched1P0N_Endcap.Fill(vis_pt)
+                hPiPhiMatched1P0N_Endcap.Fill(vis_phi)
+
+        elif (n_unique_pis == 3 and n_duplicate_pis == 0 and decay_mode == 4):
+            n_3p0n_reco += 1
+            hPiPtMatched3P0N.Fill(vis_pt)
+            hPiThetaMatched3P0N.Fill(vis_theta)
+            hPiPhiMatched3P0N.Fill(vis_phi)
+
+            if (vis_theta > 0.70 and vis_theta < 2.45):
+                hPiPtMatched3P0N_Barrel.Fill(vis_pt)
+                hPiPhiMatched3P0N_Barrel.Fill(vis_phi)
+
+            if (vis_theta > 1 and vis_theta < 2):
+                hPiPtMatched3P0N_CentBarrel.Fill(vis_pt)
+                hPiPhiMatched3P0N_CentBarrel.Fill(vis_phi)
+
+            elif ((vis_theta > 0.577 and vis_theta < 1.0) or (vis_theta > 2.0 and vis_theta < 2.56)):
+                hPiPtMatched3P0N_Transition.Fill(vis_pt)
+                hPiPhiMatched3P0N_Transition.Fill(vis_phi)
+
+            elif (vis_theta < 0.577 or vis_theta > 2.56):
+                hPiPtMatched3P0N_Endcap.Fill(vis_pt)
+                hPiPhiMatched3P0N_Endcap.Fill(vis_phi)
+
+    reader.close()
+
+print(f'1p0n eff: {n_1p0n_reco/n_1p0n_true}')
+print(f'3p0n eff: {n_3p0n_reco/n_3p0n_true}')
+
+# Create confusion matrices
+plt.figure()
+
+plt.clf()
+disp = ConfusionMatrixDisplay.from_predictions(n_pi_reco, n_pi_true, normalize='pred', include_values=True, cmap='Blues', colorbar=True)
+disp.ax_.set_ylabel(r'Number of Reconstructed $\pi^\pm$s (0 $\pi^0$s)', fontsize=12)
+disp.ax_.set_xlabel(r'Number of True $\pi^\pm$s (0 $\pi^0$s)', fontsize=12)
+disp.ax_.invert_yaxis()
+plt.tight_layout()
+plt.savefig('pi_confusion.png')
+
+plt.clf()
+disp = ConfusionMatrixDisplay.from_predictions(n_pi_unique, n_pi_true, normalize='pred', include_values=True, cmap='Blues', colorbar=True)
+disp.ax_.set_ylabel(r'Number of Unique Reco $\pi^\pm$s (0 $\pi^0$s)', fontsize=12)
+disp.ax_.set_xlabel(r'Number of True $\pi^\pm$s (0 $\pi^0$s)', fontsize=12)
+disp.ax_.invert_yaxis()
+plt.tight_layout()
+plt.savefig('pi_confusion_unique.png')
+
+plt.clf()
+disp = ConfusionMatrixDisplay.from_predictions(n_pi_duplicate, n_pi_true, normalize='pred', include_values=True, cmap='Blues', colorbar=True)
+disp.ax_.set_ylabel(r'Number of Duplicate Reco $\pi^\pm$s (0 $\pi^0$s)', fontsize=12)
+disp.ax_.set_xlabel(r'Number of True $\pi^\pm$s (0 $\pi^0$s)', fontsize=12)
+disp.ax_.invert_yaxis()
+plt.tight_layout()
+plt.savefig('pi_confusion_duplicate.png')
+
+# Create 1P0N Pion Eff Hists
+hPiPtEff1P0N = hPiPtMatched1P0N.Clone('1p0n_pi_pt_eff')
+hPiPtEff1P0N.Divide(hPiPtEff1P0N, hPiPtTrue1P0N, 1, 1, 'B')
+hPiPtEff1P0N.SetLineColor(6)
+hPiPtEff1P0N.SetLineWidth(2)
+hPiPtEff1P0N.SetTitle('1P0N Pion Reconstruction Efficiency vs Pt')
+hPiPtEff1P0N.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff1P0N.GetYaxis().SetTitle('#epsilon')
+hPiPtEff1P0N.SetStats(0)
+hists.append(hPiPtEff1P0N)
+
+hPiThetaEff1P0N = hPiThetaMatched1P0N.Clone('1p0n_pi_theta_eff')
+hPiThetaEff1P0N.Divide(hPiThetaEff1P0N, hPiThetaTrue1P0N, 1, 1, 'B')
+hPiThetaEff1P0N.SetLineColor(7)
+hPiThetaEff1P0N.SetLineWidth(2)
+hPiThetaEff1P0N.SetTitle('1P0N Pion Reconstruction Efficiency vs Theta')
+hPiThetaEff1P0N.GetXaxis().SetTitle('True Visible Tau #theta [rad]')
+hPiThetaEff1P0N.GetYaxis().SetTitle('#epsilon')
+hPiThetaEff1P0N.SetStats(0)
+hists.append(hPiThetaEff1P0N)
+
+hPiPhiEff1P0N = hPiPhiMatched1P0N.Clone('1p0n_pi_phi_eff')
+hPiPhiEff1P0N.Divide(hPiPhiEff1P0N, hPiPhiTrue1P0N, 1, 1, 'B')
+hPiPhiEff1P0N.SetLineColor(418)
+hPiPhiEff1P0N.SetLineWidth(2)
+hPiPhiEff1P0N.SetTitle('1P0N Pion Reconstruction Efficiency vs Phi')
+hPiPhiEff1P0N.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff1P0N.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff1P0N.SetStats(0)
+hists.append(hPiPhiEff1P0N)
+
+hPiPtEff1P0N_Barrel = hPiPtMatched1P0N_Barrel.Clone('1p0n_pi_pt_eff_barrel')
+hPiPtEff1P0N_Barrel.Divide(hPiPtEff1P0N_Barrel, hPiPtTrue1P0N_Barrel, 1, 1, 'B')
+hPiPtEff1P0N_Barrel.SetLineColor(6)
+hPiPtEff1P0N_Barrel.SetLineWidth(2)
+hPiPtEff1P0N_Barrel.SetTitle('1P0N Pion Reconstruction Efficiency vs Pt (Barrel)')
+hPiPtEff1P0N_Barrel.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff1P0N_Barrel.GetYaxis().SetTitle('#epsilon')
+hPiPtEff1P0N_Barrel.SetStats(0)
+hists.append(hPiPtEff1P0N_Barrel)
+
+hPiPhiEff1P0N_Barrel = hPiPhiMatched1P0N_Barrel.Clone('1p0n_pi_phi_eff_barrel')
+hPiPhiEff1P0N_Barrel.Divide(hPiPhiEff1P0N_Barrel, hPiPhiTrue1P0N_Barrel, 1, 1, 'B')
+hPiPhiEff1P0N_Barrel.SetLineColor(418)
+hPiPhiEff1P0N_Barrel.SetLineWidth(2)
+hPiPhiEff1P0N_Barrel.SetTitle('1P0N Pion Reconstruction Efficiency vs Phi (Barrel)')
+hPiPhiEff1P0N_Barrel.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff1P0N_Barrel.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff1P0N_Barrel.SetStats(0)
+hists.append(hPiPhiEff1P0N_Barrel)
+
+hPiPtEff1P0N_CentBarrel = hPiPtMatched1P0N_CentBarrel.Clone('1p0n_pi_pt_eff_centbarrel')
+hPiPtEff1P0N_CentBarrel.Divide(hPiPtEff1P0N_CentBarrel, hPiPtTrue1P0N_CentBarrel, 1, 1, 'B')
+hPiPtEff1P0N_CentBarrel.SetLineColor(6)
+hPiPtEff1P0N_CentBarrel.SetLineWidth(2)
+hPiPtEff1P0N_CentBarrel.SetTitle('1P0N Pion Reconstruction Efficiency vs Pt (Central Barrel)')
+hPiPtEff1P0N_CentBarrel.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff1P0N_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPiPtEff1P0N_CentBarrel.SetStats(0)
+hists.append(hPiPtEff1P0N_CentBarrel)
+
+hPiPhiEff1P0N_CentBarrel = hPiPhiMatched1P0N_CentBarrel.Clone('1p0n_pi_phi_eff_centbarrel')
+hPiPhiEff1P0N_CentBarrel.Divide(hPiPhiEff1P0N_CentBarrel, hPiPhiTrue1P0N_CentBarrel, 1, 1, 'B')
+hPiPhiEff1P0N_CentBarrel.SetLineColor(418)
+hPiPhiEff1P0N_CentBarrel.SetLineWidth(2)
+hPiPhiEff1P0N_CentBarrel.SetTitle('1P0N Pion Reconstruction Efficiency vs Phi (Central Barrel)')
+hPiPhiEff1P0N_CentBarrel.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff1P0N_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff1P0N_CentBarrel.SetStats(0)
+hists.append(hPiPhiEff1P0N_CentBarrel)
+
+hPiPtEff1P0N_Endcap = hPiPtMatched1P0N_Endcap.Clone('1p0n_pi_pt_eff_endcap')
+hPiPtEff1P0N_Endcap.Divide(hPiPtEff1P0N_Endcap, hPiPtTrue1P0N_Endcap, 1, 1, 'B')
+hPiPtEff1P0N_Endcap.SetLineColor(6)
+hPiPtEff1P0N_Endcap.SetLineWidth(2)
+hPiPtEff1P0N_Endcap.SetTitle('1P0N Pion Reconstruction Efficiency vs Pt (Endcap)')
+hPiPtEff1P0N_Endcap.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff1P0N_Endcap.GetYaxis().SetTitle('#epsilon')
+hPiPtEff1P0N_Endcap.SetStats(0)
+hists.append(hPiPtEff1P0N_Endcap)
+
+hPiPhiEff1P0N_Endcap = hPiPhiMatched1P0N_Endcap.Clone('1p0n_pi_phi_eff_endcap')
+hPiPhiEff1P0N_Endcap.Divide(hPiPhiEff1P0N_Endcap, hPiPhiTrue1P0N_Endcap, 1, 1, 'B')
+hPiPhiEff1P0N_Endcap.SetLineColor(418)
+hPiPhiEff1P0N_Endcap.SetLineWidth(2)
+hPiPhiEff1P0N_Endcap.SetTitle('1P0N Pion Reconstruction Efficiency vs Phi (Endcap)')
+hPiPhiEff1P0N_Endcap.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff1P0N_Endcap.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff1P0N_Endcap.SetStats(0)
+hists.append(hPiPhiEff1P0N_Endcap)
+
+hPiPtEff1P0N_Transition = hPiPtMatched1P0N_Transition.Clone('1p0n_pi_pt_eff_transition')
+hPiPtEff1P0N_Transition.Divide(hPiPtEff1P0N_Transition, hPiPtTrue1P0N_Transition, 1, 1, 'B')
+hPiPtEff1P0N_Transition.SetLineColor(6)
+hPiPtEff1P0N_Transition.SetLineWidth(2)
+hPiPtEff1P0N_Transition.SetTitle('1P0N Pion Reconstruction Efficiency vs Pt (Transition)')
+hPiPtEff1P0N_Transition.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff1P0N_Transition.GetYaxis().SetTitle('#epsilon')
+hPiPtEff1P0N_Transition.SetStats(0)
+hists.append(hPiPtEff1P0N_Transition)
+
+hPiPhiEff1P0N_Transition = hPiPhiMatched1P0N_Transition.Clone('1p0n_pi_phi_eff_transition')
+hPiPhiEff1P0N_Transition.Divide(hPiPhiEff1P0N_Transition, hPiPhiTrue1P0N_Transition, 1, 1, 'B')
+hPiPhiEff1P0N_Transition.SetLineColor(418)
+hPiPhiEff1P0N_Transition.SetLineWidth(2)
+hPiPhiEff1P0N_Transition.SetTitle('1P0N Pion Reconstruction Efficiency vs Phi (Transition)')
+hPiPhiEff1P0N_Transition.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff1P0N_Transition.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff1P0N_Transition.SetStats(0)
+hists.append(hPiPhiEff1P0N_Transition)
+
+# Create 3P0N Pion Eff Hists
+hPiPtEff3P0N = hPiPtMatched3P0N.Clone('3p0n_pi_pt_eff')
+hPiPtEff3P0N.Divide(hPiPtEff3P0N, hPiPtTrue3P0N, 1, 1, 'B')
+hPiPtEff3P0N.SetLineColor(6)
+hPiPtEff3P0N.SetLineWidth(2)
+hPiPtEff3P0N.SetTitle('3P0N Pion Reconstruction Efficiency vs Pt')
+hPiPtEff3P0N.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff3P0N.GetYaxis().SetTitle('#epsilon')
+hPiPtEff3P0N.SetStats(0)
+hists.append(hPiPtEff3P0N)
+
+hPiThetaEff3P0N = hPiThetaMatched3P0N.Clone('3p0n_pi_theta_eff')
+hPiThetaEff3P0N.Divide(hPiThetaEff3P0N, hPiThetaTrue3P0N, 1, 1, 'B')
+hPiThetaEff3P0N.SetLineColor(7)
+hPiThetaEff3P0N.SetLineWidth(2)
+hPiThetaEff3P0N.SetTitle('3P0N Pion Reconstruction Efficiency vs Theta')
+hPiThetaEff3P0N.GetXaxis().SetTitle('True Visible Tau #theta [rad]')
+hPiThetaEff3P0N.GetYaxis().SetTitle('#epsilon')
+hPiThetaEff3P0N.SetStats(0)
+hists.append(hPiThetaEff3P0N)
+
+hPiPhiEff3P0N = hPiPhiMatched3P0N.Clone('3p0n_pi_phi_eff')
+hPiPhiEff3P0N.Divide(hPiPhiEff3P0N, hPiPhiTrue3P0N, 1, 1, 'B')
+hPiPhiEff3P0N.SetLineColor(438)
+hPiPhiEff3P0N.SetLineWidth(2)
+hPiPhiEff3P0N.SetTitle('3P0N Pion Reconstruction Efficiency vs Phi')
+hPiPhiEff3P0N.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff3P0N.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff3P0N.SetStats(0)
+hists.append(hPiPhiEff3P0N)
+
+hPiPtEff3P0N_Barrel = hPiPtMatched3P0N_Barrel.Clone('3p0n_pi_pt_eff_barrel')
+hPiPtEff3P0N_Barrel.Divide(hPiPtEff3P0N_Barrel, hPiPtTrue3P0N_Barrel, 1, 1, 'B')
+hPiPtEff3P0N_Barrel.SetLineColor(6)
+hPiPtEff3P0N_Barrel.SetLineWidth(2)
+hPiPtEff3P0N_Barrel.SetTitle('3P0N Pion Reconstruction Efficiency vs Pt (Barrel)')
+hPiPtEff3P0N_Barrel.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff3P0N_Barrel.GetYaxis().SetTitle('#epsilon')
+hPiPtEff3P0N_Barrel.SetStats(0)
+hists.append(hPiPtEff3P0N_Barrel)
+
+hPiPhiEff3P0N_Barrel = hPiPhiMatched3P0N_Barrel.Clone('3p0n_pi_phi_eff_barrel')
+hPiPhiEff3P0N_Barrel.Divide(hPiPhiEff3P0N_Barrel, hPiPhiTrue3P0N_Barrel, 1, 1, 'B')
+hPiPhiEff3P0N_Barrel.SetLineColor(418)
+hPiPhiEff3P0N_Barrel.SetLineWidth(2)
+hPiPhiEff3P0N_Barrel.SetTitle('3P0N Pion Reconstruction Efficiency vs Phi (Barrel)')
+hPiPhiEff3P0N_Barrel.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff3P0N_Barrel.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff3P0N_Barrel.SetStats(0)
+hists.append(hPiPhiEff3P0N_Barrel)
+
+hPiPtEff3P0N_CentBarrel = hPiPtMatched3P0N_CentBarrel.Clone('3p0n_pi_pt_eff_centbarrel')
+hPiPtEff3P0N_CentBarrel.Divide(hPiPtEff3P0N_CentBarrel, hPiPtTrue3P0N_CentBarrel, 1, 1, 'B')
+hPiPtEff3P0N_CentBarrel.SetLineColor(6)
+hPiPtEff3P0N_CentBarrel.SetLineWidth(2)
+hPiPtEff3P0N_CentBarrel.SetTitle('3P0N Pion Reconstruction Efficiency vs Pt (Central Barrel)')
+hPiPtEff3P0N_CentBarrel.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff3P0N_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPiPtEff3P0N_CentBarrel.SetStats(0)
+hists.append(hPiPtEff3P0N_CentBarrel)
+
+hPiPhiEff3P0N_CentBarrel = hPiPhiMatched3P0N_CentBarrel.Clone('3p0n_pi_phi_eff_centbarrel')
+hPiPhiEff3P0N_CentBarrel.Divide(hPiPhiEff3P0N_CentBarrel, hPiPhiTrue3P0N_CentBarrel, 1, 1, 'B')
+hPiPhiEff3P0N_CentBarrel.SetLineColor(418)
+hPiPhiEff3P0N_CentBarrel.SetLineWidth(2)
+hPiPhiEff3P0N_CentBarrel.SetTitle('3P0N Pion Reconstruction Efficiency vs Phi (Central Barrel)')
+hPiPhiEff3P0N_CentBarrel.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff3P0N_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff3P0N_CentBarrel.SetStats(0)
+hists.append(hPiPhiEff3P0N_CentBarrel)
+
+hPiPtEff3P0N_Endcap = hPiPtMatched3P0N_Endcap.Clone('3p0n_pi_pt_eff_endcap')
+hPiPtEff3P0N_Endcap.Divide(hPiPtEff3P0N_Endcap, hPiPtTrue3P0N_Endcap, 1, 1, 'B')
+hPiPtEff3P0N_Endcap.SetLineColor(6)
+hPiPtEff3P0N_Endcap.SetLineWidth(2)
+hPiPtEff3P0N_Endcap.SetTitle('3P0N Pion Reconstruction Efficiency vs Pt (Endcap)')
+hPiPtEff3P0N_Endcap.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff3P0N_Endcap.GetYaxis().SetTitle('#epsilon')
+hPiPtEff3P0N_Endcap.SetStats(0)
+hists.append(hPiPtEff3P0N_Endcap)
+
+hPiPhiEff3P0N_Endcap = hPiPhiMatched3P0N_Endcap.Clone('3p0n_pi_phi_eff_endcap')
+hPiPhiEff3P0N_Endcap.Divide(hPiPhiEff3P0N_Endcap, hPiPhiTrue3P0N_Endcap, 1, 1, 'B')
+hPiPhiEff3P0N_Endcap.SetLineColor(418)
+hPiPhiEff3P0N_Endcap.SetLineWidth(2)
+hPiPhiEff3P0N_Endcap.SetTitle('3P0N Pion Reconstruction Efficiency vs Phi (Endcap)')
+hPiPhiEff3P0N_Endcap.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff3P0N_Endcap.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff3P0N_Endcap.SetStats(0)
+hists.append(hPiPhiEff3P0N_Endcap)
+
+hPiPtEff3P0N_Transition = hPiPtMatched3P0N_Transition.Clone('3p0n_pi_pt_eff_transition')
+hPiPtEff3P0N_Transition.Divide(hPiPtEff3P0N_Transition, hPiPtTrue3P0N_Transition, 1, 1, 'B')
+hPiPtEff3P0N_Transition.SetLineColor(6)
+hPiPtEff3P0N_Transition.SetLineWidth(2)
+hPiPtEff3P0N_Transition.SetTitle('3P0N Pion Reconstruction Efficiency vs Pt (Transition)')
+hPiPtEff3P0N_Transition.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPiPtEff3P0N_Transition.GetYaxis().SetTitle('#epsilon')
+hPiPtEff3P0N_Transition.SetStats(0)
+hists.append(hPiPtEff3P0N_Transition)
+
+hPiPhiEff3P0N_Transition = hPiPhiMatched3P0N_Transition.Clone('3p0n_pi_phi_eff_transition')
+hPiPhiEff3P0N_Transition.Divide(hPiPhiEff3P0N_Transition, hPiPhiTrue3P0N_Transition, 1, 1, 'B')
+hPiPhiEff3P0N_Transition.SetLineColor(418)
+hPiPhiEff3P0N_Transition.SetLineWidth(2)
+hPiPhiEff3P0N_Transition.SetTitle('3P0N Pion Reconstruction Efficiency vs Phi (Transition)')
+hPiPhiEff3P0N_Transition.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPiPhiEff3P0N_Transition.GetYaxis().SetTitle('#epsilon')
+hPiPhiEff3P0N_Transition.SetStats(0)
+hists.append(hPiPhiEff3P0N_Transition)
+
+# Write to output file
+output_file = TFile(args.outputFile, 'RECREATE')
+for hist in hists:
+    hist.Write()
+output_file.Close()
+
+# Draw hists and save as PNG
+for hist in hists:
+    filename = hist.GetName() + '.png'
+    canvas = TCanvas()
+    hist.Draw()
+    canvas.SaveAs(filename)

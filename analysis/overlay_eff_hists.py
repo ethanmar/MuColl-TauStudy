@@ -4,12 +4,13 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 
 # parser.add_argument('--inputFileOld', type=str, default='./tau_gun/MAIA/TauFinderOutputs/tau_ana_cone_10_pt_01.root')
-parser.add_argument('--inputFile', type=str, default='./tau_gun/MAIA/TauFinderOutputs/tau_ana_cone_15_pt_1000.root')
-
+parser.add_argument('--inputFileTau', type=str, default='tau_eff.root')
+parser.add_argument('--inputFilePi', type=str, default='pi_eff.root')
 args = parser.parse_args()
 
 # root_file_old = ROOT.TFile(args.inputFileOld, 'READ')
-root_file = ROOT.TFile(args.inputFile, 'READ')
+root_file_tau = ROOT.TFile(args.inputFileTau, 'READ')
+root_file_pi = ROOT.TFile(args.inputFilePi, 'READ')
 
 
 
@@ -23,11 +24,11 @@ for num in nums:
     for i in range(3):
         # for j in range(2):
         # hOld = root_file_old.Get('reco_' + num + 'p_' + names[i] + '_eff' + regions[j])
-        hTau = root_file.Get('reco_' + num + 'p_' + names[i] + '_eff')
-        hPion = root_file.Get(num + 'p_pi_' + names[i] + '_eff')
+        hTau = root_file_tau.Get(num + 'p0n_tau_' + names[i] + '_eff')
+        hPion = root_file_pi.Get(num + 'p0n_pi_' + names[i] + '_eff')
         
         hPion.SetTitle('')
-        hPion.SetName(num + 'p0n_' + names[i])
+        hPion.SetName(num + 'p0n_' + names[i] + '_eff')
         hPion.GetXaxis().SetTitle('Tau Truth ' + variables[i] + ' [' + units[i] + ']')
         hPion.GetYaxis().SetRangeUser(0.0, 1.3)
             

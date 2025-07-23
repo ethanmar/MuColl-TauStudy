@@ -1,0 +1,286 @@
+from pyLCIO import IOIMPL, EVENT, UTIL
+from ROOT import TH1F, TFile, TCanvas
+import math
+from argparse import ArgumentParser
+from array import array
+import os
+import fnmatch
+import numpy as np
+import matplotlib.pyplot as plt
+
+from tau_mc_link import getLinkedMCTau, getDecayMode
+
+# Command line arguments
+parser = ArgumentParser()
+
+# Input file
+parser.add_argument('--inputFile', type=str, default='output_reco.slcio')
+
+args = parser.parse_args()
+
+# Check if input file is a directory or a single file    
+to_process = []
+
+if os.path.isdir(args.inputFile):
+    for r, d, f in os.walk(args.inputFile):
+        for file in f:
+            to_process.append(os.path.join(r, file))
+else:
+    to_process.append(args.inputFile)
+
+events = [54, 833, 1264, 1286, 1672, 1982, 1994, 2127, 2374, 2431, 2541, 2642, 3227, 3342, 3510, 4448, 4527, 5252, 5690, 5845, 6744, 7980, 8012, 8587]
+
+# Open input file(s)
+for file in to_process:
+    reader = IOIMPL.LCFactory.getInstance().createLCReader()
+    reader.open(file)
+
+    # Loop through events
+    for ievt, event in enumerate(reader):
+
+        if event.getEventNumber() in events:
+        
+            # Get collections
+            pfos = event.getCollection('PandoraPFOs')
+            vertex_barrel_hits = event.getCollection('VertexBarrelCollection')
+            vertex_endcap_hits = event.getCollection('VertexEndcapCollection')
+            inner_trkr_barrel_hits = event.getCollection('InnerTrackerBarrelCollection')
+            inner_trkr_endcap_hits = event.getCollection('InnerTrackerEndcapCollection')
+            outer_trkr_barrel_hits = event.getCollection('OuterTrackerBarrelCollection')
+            outer_trkr_endcap_hits = event.getCollection('OuterTrackerEndcapCollection')
+            ecal_barrel_hits = event.getCollection('ECalBarrelCollection')
+            ecal_endcap_hits = event.getCollection('ECalEndcapCollection')
+            hcal_barrel_hits = event.getCollection('HCalBarrelCollection')
+            hcal_endcap_hits = event.getCollection('HCalEndcapCollection')
+            mc_particles = event.getCollection('MCParticle')
+
+            # Store mc pis from tau decay
+            mc_tau_pis = []
+            # Loop through mc particles
+            for mc_particle in mc_particles:
+                # Tag taus
+                if (abs(mc_particle.getPDG()) == 15):
+                    # Get daughters
+                    daughters = mc_particle.getDaughters()
+                    for daughter in daughters:
+                        # Tag charged pions
+                        if (abs(daughter.getPDG()) == 211):
+                            mc_tau_pis.append(daughter)
+
+            fig1, ax1 = plt.subplots()
+            fig2, ax2 = plt.subplots()
+            ax1.set_xlim(-5000, 5000)
+            ax1.set_ylim(-5000, 5000)
+            ax2.set_xlim(-5000, 5000)
+            ax2.set_ylim(0, 5000)
+            ax1.set_xlabel("x [mm]")
+            ax1.set_ylabel("y [mm]")
+            ax2.set_xlabel("z [mm]")
+            ax2.set_ylabel("r [mm]")
+            colors=['m', 'c', 'g']
+            markers = ['o', 's', '^']
+            # Loop through mc pis from tau decay
+            for imc_tau_pi, mc_tau_pi in enumerate(mc_tau_pis):
+                mom = mc_tau_pi.getMomentum()
+                pt = math.sqrt(mom[0]**2 + mom[1]**2)
+                hit_x = []
+                hit_y = []
+                hit_z = []
+                hit_r = []
+                # Loop through vertex barrel hits
+                for vertex_barrel_hit in vertex_barrel_hits:
+                    # Get mc particle
+                    mc_particle = vertex_barrel_hit.getMCParticle()
+                    # Tag charged pions
+                    if (abs(mc_particle.getPDG()) == 211):
+                        if mc_particle == mc_tau_pi:
+                            # Get hit position
+                            pos = vertex_barrel_hit.getPosition()
+                            x = pos[0]
+                            hit_x.append(x)
+                            y = pos[1]
+                            hit_y.append(y)
+                            z = pos[2]
+                            hit_z.append(z)
+                            r = math.sqrt(x**2 + y**2 + z**2)
+                            hit_r.append(r)
+                            
+                # Loop through vertex endcap hits
+                for vertex_endcap_hit in vertex_endcap_hits:
+                    # Get mc particle
+                    mc_particle = vertex_endcap_hit.getMCParticle()
+                    # Tag charged pions
+                    if (abs(mc_particle.getPDG()) == 211):
+                        if mc_particle == mc_tau_pi:
+                            # Get hit position
+                            pos = vertex_endcap_hit.getPosition()
+                            x = pos[0]
+                            hit_x.append(x)
+                            y = pos[1]
+                            hit_y.append(y)
+                            z = pos[2]
+                            hit_z.append(z)
+                            r = math.sqrt(x**2 + y**2 + z**2)
+                            hit_r.append(r)
+                # Loop through inner tracker barrel hits
+                for inner_trkr_barrel_hit in inner_trkr_barrel_hits:
+                    # Get mc particle
+                    mc_particle = inner_trkr_barrel_hit.getMCParticle()
+                    # Tag charged pions
+                    if (abs(mc_particle.getPDG()) == 211):
+                        if mc_particle == mc_tau_pi:
+                            # Get hit position
+                            pos = inner_trkr_barrel_hit.getPosition()
+                            x = pos[0]
+                            hit_x.append(x)
+                            y = pos[1]
+                            hit_y.append(y)
+                            z = pos[2]
+                            hit_z.append(z)
+                            r = math.sqrt(x**2 + y**2 + z**2)
+                            hit_r.append(r)
+                # Loop through inner tracker endcap hits
+                for inner_trkr_endcap_hit in inner_trkr_endcap_hits:
+                    # Get mc particle
+                    mc_particle = inner_trkr_endcap_hit.getMCParticle()
+                    # Tag charged pions
+                    if (abs(mc_particle.getPDG()) == 211):
+                        if mc_particle == mc_tau_pi:
+                            # Get hit position
+                            pos = inner_trkr_endcap_hit.getPosition()
+                            x = pos[0]
+                            hit_x.append(x)
+                            y = pos[1]
+                            hit_y.append(y)
+                            z = pos[2]
+                            hit_z.append(z)
+                            r = math.sqrt(x**2 + y**2 + z**2)
+                            hit_r.append(r)
+                # Loop through outer tracker barrel hits
+                for outer_trkr_barrel_hit in outer_trkr_barrel_hits:
+                    # Get mc particle
+                    mc_particle = outer_trkr_barrel_hit.getMCParticle()
+                    # Tag charged pions
+                    if (abs(mc_particle.getPDG()) == 211):
+                        if mc_particle == mc_tau_pi:
+                            # Get hit position
+                            pos = outer_trkr_barrel_hit.getPosition()
+                            x = pos[0]
+                            hit_x.append(x)
+                            y = pos[1]
+                            hit_y.append(y)
+                            z = pos[2]
+                            hit_z.append(z)
+                            r = math.sqrt(x**2 + y**2 + z**2)
+                            hit_r.append(r)
+                # Loop through outer tracker endcap hits
+                for outer_trkr_endcap_hit in outer_trkr_endcap_hits:
+                    # Get mc particle
+                    mc_particle = outer_trkr_endcap_hit.getMCParticle()
+                    # Tag charged pions
+                    if (abs(mc_particle.getPDG()) == 211):
+                        if mc_particle == mc_tau_pi:
+                            # Get hit position
+                            pos = outer_trkr_endcap_hit.getPosition()
+                            x = pos[0]
+                            hit_x.append(x)
+                            y = pos[1]
+                            hit_y.append(y)
+                            z = pos[2]
+                            hit_z.append(z)
+                            r = math.sqrt(x**2 + y**2 + z**2)
+                            hit_r.append(r)
+                # Loop through ecal barrel hits
+                for ecal_barrel_hit in ecal_barrel_hits:
+                    # Get number of mc particle contributions
+                    n_mc_particles = ecal_barrel_hit.getNMCContributions()
+                    for i in range(n_mc_particles):
+                        # Get mc particle contribution
+                        mc_particle = ecal_barrel_hit.getParticleCont(i)
+                        # Tag charged pions
+                        if (abs(mc_particle.getPDG()) == 211):
+                            if mc_particle == mc_tau_pi:
+                                # Get hit position
+                                pos = ecal_barrel_hit.getPosition()
+                                x = pos[0]
+                                hit_x.append(x)
+                                y = pos[1]
+                                hit_y.append(y)
+                                z = pos[2]
+                                hit_z.append(z)
+                                r = math.sqrt(x**2 + y**2 + z**2)
+                                hit_r.append(r)
+                                break
+                # Loop through ecal endcap hits
+                for ecal_endcap_hit in ecal_endcap_hits:
+                    # Get number of mc particle contributions
+                    n_mc_particles = ecal_endcap_hit.getNMCContributions()
+                    for i in range(n_mc_particles):
+                        # Get mc particle contribution
+                        mc_particle = ecal_endcap_hit.getParticleCont(i)
+                        # Tag charged pions
+                        if (abs(mc_particle.getPDG()) == 211):
+                            if mc_particle == mc_tau_pi:
+                                # Get hit position
+                                pos = ecal_endcap_hit.getPosition()
+                                x = pos[0]
+                                hit_x.append(x)
+                                y = pos[1]
+                                hit_y.append(y)
+                                z = pos[2]
+                                hit_z.append(z)
+                                r = math.sqrt(x**2 + y**2 + z**2)
+                                hit_r.append(r)
+                                break
+                # Loop through hcal barrel hits
+                for hcal_barrel_hit in hcal_barrel_hits:
+                    # Get number of mc particle contributions
+                    n_mc_particles = hcal_barrel_hit.getNMCContributions()
+                    for i in range(n_mc_particles):
+                        # Get mc particle contribution
+                        mc_particle = hcal_barrel_hit.getParticleCont(i)
+                        # Tag charged pions
+                        if (abs(mc_particle.getPDG()) == 211):
+                            if mc_particle == mc_tau_pi:
+                                # Get hit position
+                                pos = hcal_barrel_hit.getPosition()
+                                x = pos[0]
+                                hit_x.append(x)
+                                y = pos[1]
+                                hit_y.append(y)
+                                z = pos[2]
+                                hit_z.append(z)
+                                r = math.sqrt(x**2 + y**2 + z**2)
+                                hit_r.append(r)
+                                break
+                # Loop through hcal endcap hits
+                for hcal_endcap_hit in hcal_endcap_hits:
+                    # Get number of mc particle contributions
+                    n_mc_particles = hcal_endcap_hit.getNMCContributions()
+                    for i in range(n_mc_particles):
+                        # Get mc particle contribution
+                        mc_particle = hcal_endcap_hit.getParticleCont(i)
+                        # Tag charged pions
+                        if (abs(mc_particle.getPDG()) == 211):
+                            if mc_particle == mc_tau_pi:
+                                # Get hit position
+                                pos = hcal_endcap_hit.getPosition()
+                                x = pos[0]
+                                hit_x.append(x)
+                                y = pos[1]
+                                hit_y.append(y)
+                                z = pos[2]
+                                hit_z.append(z)
+                                r = math.sqrt(x**2 + y**2 + z**2)
+                                hit_r.append(r)
+                                break                                        
+
+                ax1.scatter(hit_x, hit_y, c=colors[imc_tau_pi], marker=markers[imc_tau_pi], label=f'Pt = {pt:.2f} GeV/c')
+                ax2.scatter(hit_z, hit_r, c=colors[imc_tau_pi], marker=markers[imc_tau_pi], label=f'Pt = {pt:.2f} GeV/c')
+
+            ax1.legend()
+            ax2.legend()
+            fig1.savefig(f'x_vs_y_{event.getEventNumber()}.png')
+            fig2.savefig(f'r_vs_z_{event.getEventNumber()}.png')
+                            
+    reader.close()

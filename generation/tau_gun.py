@@ -2,106 +2,86 @@
 # E. Martinez, 10/01/2024
 
 import math
-import numpy as np
 import random
 from array import array
-from g4units import deg
-import argparse
 
 # LCIO dependencies
 from pyLCIO import UTIL, EVENT, IMPL, IO, IOIMPL
 
-# Command line arguments
-parser = argparse.ArgumentParser()
-parser.add_argument("--nEvents", type=int, default=1000)
-parser.add_argument("--outputFile", type=str, default="tau_gen.slcio")
-args = parser.parse_args()
-
-# Number of events per momentum bin
-nevt = args.nEvents
-
 # Output file
-outfile = args.outputFile
+outfile = "tau_gen_50k.slcio"
 
 # Open output file
 wrt = IOIMPL.LCFactory.getInstance().createLCWriter( )
 wrt.open(outfile, EVENT.LCIO.WRITE_NEW) 
 
+# Number of events
+nevt = 50000
+
 #========== particle properties ===================
 
-# Set random seed
 random.seed()
 
-# Generator status
 genstat  = 1
 
-# PDG
-pdg = 15 # tau
+pt_min = 20
+pt_max = 320
 
-# Mass
-mass =  1.77686 # GeV/c^2
+theta_min = 8./180.*math.pi
+theta_max = 172./180.*math.pi
 
-# Charge
+pdg = 15 
+
+mass =  1.77686 
+
 charge = -1.
 
-# Decay length
 decayLen = 1.e22
-
-# Bounds on theta
-theta_min = 10.0 * deg
-theta_max = 170.0 * deg
 
 #=================================================
 
-# Loop over events
 for n in range(nevt):
-    
-    # Initialize MCParticle collection and event
-    col = IMPL.LCCollectionVec(EVENT.LCIO.MCPARTICLE) 
-    evt = IMPL.LCEventImpl() 
 
-    # Set event number and add MCParticle collection
+    col = IMPL.LCCollectionVec(EVENT.LCIO.MCPARTICLE)
+    evt = IMPL.LCEventImpl()
+
     evt.setEventNumber(n)
     evt.addCollection(col, "MCParticle")
 
-    # Generate particle properties
-    pT = random.random()*300.+20 # uniform in pT (20-320 GeV/c)
 
-    phi =  random.random()*np.pi*2. # uniform in phi
-    theta = random.uniform(theta_min, theta_max) # uniform in theta
-                
-    px = pT*np.cos(phi)
-    py = pT*np.sin(phi)
-    pz = pT/np.tan(theta) 
+    pt = random.uniform(pt_min, pt_max)
+    theta = random.uniform(theta_min, theta_max)
+    phi = random.random() * math.pi * 2.
+    p = pt/math.sin(theta)
+    px = pt * math.cos(phi)
+    py = pt * math.sin(phi)
+    pz = p * math.cos(theta)
 
-    momentum  = array('f', [px, py, pz])  
+    momentum = array('f', [px, py, pz])
 
-    epx = decayLen*np.cos(phi)*np.sin(theta) 
-    epy = decayLen*np.sin(phi)*np.sin(theta)
-    epz = decayLen*np.cos(theta) 
+    epx = decayLen*math.cos(phi)*math.sin(theta)
+    epy = decayLen*math.sin(phi)*math.sin(theta)
+    epz = decayLen*math.cos(theta)
 
-    # Decay position vector
-    endpoint = array('d', [epx, epy, epz])  
-        
+    endpoint = array('d', [epx, epy, epz])
 
-#--------------- create MCParticle -------------------
+# --------------- create MCParticle -------------------
 
-    mcp = IMPL.MCParticleImpl() 
+    mcp = IMPL.MCParticleImpl()
 
-    mcp.setGeneratorStatus(genstat) 
+    mcp.setGeneratorStatus(genstat)
     mcp.setMass(mass)
-    mcp.setPDG(pdg) 
+    mcp.setPDG(pdg)
     mcp.setMomentum(momentum)
-    mcp.setCharge(charge) 
-
-    if(decayLen < 1.e9):   
-        mcp.setEndpoint(endpoint)
+    mcp.setCharge(charge)
         
-#-------------------------------------------------------
+    if (decayLen < 1.e9):   # arbitrary ...
+        mcp.setEndpoint(endpoint)
+
+# -------------------------------------------------------
 
     col.addElement(mcp)
-        
+
     wrt.writeEvent(evt)
 
-
-wrt.close() 
+wrt.close()
