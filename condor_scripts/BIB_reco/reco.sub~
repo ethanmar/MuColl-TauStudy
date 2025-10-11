@@ -1,0 +1,41 @@
+#initialize sample
+# I'm assuming that you are running in a batch mode, where the input samples have been split into 10 event chunks
+# "sample" is determined by your joblist.txt file. Edit your joblist to submit a condor job per file.
+# Or remove this feature out if you just want to submit one job.
+sample = 0000
+
+# path to files that are copied to worker node
+# change your paths to the appropriate location
+input_file_name = split_tau_sim_5_250.$(sample).slcio
+input_file_path = /scratch/ethanmar/tauStudy/tau_gun/sim/split_tau_sim_5_250/$(input_file_name)
+digi_reco_script = /scratch/ethanmar/tauStudy/condor_scripts/BIB_reco/steer_reco_condor.py
+pandoraSettings_path = /scratch/ethanmar/tauStudy/condor_scripts/BIB_reco/PandoraSettings
+
+# these you should have ready from the tutorial https://mcd-wiki.web.cern.ch/software/howto/maia/
+maia_GEO = /scratch/ethanmar/tauStudy/detector-simulation/geometries/MAIA_v0
+myBIBUtils_path = /scratch/ethanmar/tauStudy/MyBIBUtils
+ACTSTracking_path = /scratch/ethanmar/tauStudy/ACTSTracking
+
+Universe = Vanilla
++SingularityImage = "/cvmfs/unpacked.cern.ch/ghcr.io/muoncollidersoft/mucoll-sim-alma9:latest"
+Executable     = reco.sh
+Requirements = ( HAS_SINGULARITY ) && ( HAS_CVMFS_unpacked_cern_ch ) && ( HAS_CVMFS_public_uc_osgstorage_org )
+should_transfer_files = YES
+Output  = output.out.$(Cluster)-$(Process)
+Log     = log.$(Cluster)
+Error   = error.out.$(Cluster)-$(Process)
+stream_output = True
+stream_error  = True
+transfer_input_files = $(input_file_path), $(digi_reco_script), $(maia_GEO), $(myBIBUtils_path), $(pandoraSettings_path), $(ACTSTracking_path)
+when_to_transfer_output = ON_EXIT
+request_cpus = 1
+request_disk = 10GB
+request_memory = 10GB
++ProjectName="collab.futurecolliders"
+# update this path
+Executable = /scratch/ethanmar/tauStudy/condor_scripts/BIB_reco/reco.sh
+Arguments = "--inputFile $(input_file_name)"
+
+# queue many jobs, determined by joblist.txt
+# Queue sample from joblist.txt
+Queue 1

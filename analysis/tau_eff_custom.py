@@ -300,8 +300,9 @@ if os.path.isdir(args.inputFile):
 else:
     to_process.append(args.inputFile)
 
-n_pi_true = []
-n_pi_reco = []
+# n_pi_true = []
+# n_pi_reco = []
+tau_cm = np.zeros((5, 4))
 
 n_1p0n_true = 0
 n_1p0n_reco = 0
@@ -329,7 +330,7 @@ for file in to_process:
         vis_pt = 0
         vis_theta = 0
         vis_phi = 0
-        
+
         # Loop through mc particles
         for mc_particle in mc_particles:
 
@@ -344,7 +345,7 @@ for file in to_process:
                 vis_pt = getPt(vis_props)
                 vis_theta = getTheta(vis_props)
                 vis_phi = getPhi(vis_props)
-                
+
                 # Fill true 1P0N hists
                 if (decay_mode == 0):
                     n_1p0n_true += 1
@@ -398,11 +399,11 @@ for file in to_process:
             n_matched_pis = getNRecoPis(tau, mc_particles)
 
             if (decay_mode == 0 or decay_mode == 4):
-                n_pi_reco.append(n_matched_pis)
-                if (decay_mode == 0):
-                    n_pi_true.append(1)
-                elif (decay_mode == 4):
-                    n_pi_true.append(3)
+                if n_matched_pis <= 4:
+                    if (decay_mode == 0):
+                        tau_cm[n_matched_pis][1] += 1
+                    elif (decay_mode == 4):
+                        tau_cm[n_matched_pis][3] += 1
             
             # Fill linked 1P0N hists
             if (n_matched_pis == 1 and decay_mode == 0):
@@ -458,11 +459,19 @@ print(f'3p0n eff: {n_3p0n_reco/n_3p0n_true}')
 # Create confusion matrices
 plt.figure()
 
-plt.clf()
-disp = ConfusionMatrixDisplay.from_predictions(n_pi_reco, n_pi_true, normalize='pred', include_values=True, cmap='Blues', colorbar=True)
-disp.ax_.set_ylabel(r'Number of Reconstructed Prongs (0 $\pi^0$s)', fontsize=12)
-disp.ax_.set_xlabel(r'Number of True Prongs (0 $\pi^0$s)', fontsize=12)
-disp.ax_.invert_yaxis()
+tau_column_sums = tau_cm.sum(axis=0, keepdims=True)
+tau_cm_norm = np.divide(tau_cm.astype('float'), tau_column_sums, out=np.zeros_like(tau_cm, dtype=float), where=tau_column_sums != 0)
+
+plt.imshow(tau_cm_norm, origin='lower', cmap='Blues')
+plt.colorbar()
+plt.xlabel(r'Number of True $\tau^\pm$ Prongs (0 $\pi^0$s)', fontsize=12)
+plt.ylabel(r'Number of Reconstructed $\tau^\pm$ Prongs (0 $\pi^0$s)', fontsize=12)
+plt.xticks(np.arange(tau_cm_norm.shape[1]), labels=['0', '1', '2', '3'])
+plt.yticks(np.arange(tau_cm_norm.shape[0]), labels=['0', '1', '2', '3', '4'])
+for i in range(tau_cm_norm.shape[0]):
+    for j in range(tau_cm_norm.shape[1]):
+        value = tau_cm_norm[i,j]
+        plt.text(j, i, f"{value:.2f}", ha="center", va="center", color="black")
 plt.tight_layout()
 plt.savefig('tau_confusion.png')
 

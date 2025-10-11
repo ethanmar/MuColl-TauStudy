@@ -11,7 +11,7 @@ root_file_tau = ROOT.TFile(args.inputFileTau, 'READ')
 root_file_pi = ROOT.TFile(args.inputFilePi, 'READ')
 
 names = ['pt', 'phi']
-variables = ['#it{p}_{T}^{vis}', '#phi^{vis}']
+variables = ['#it{p_{T}^{vis}}', '#phi']
 units = ['GeV/c', 'rad']
 regions = ['centbarrel', 'transition', 'endcap']
 
@@ -31,7 +31,7 @@ for i in range(3):
 
         hPion1P0N.SetTitle('')
         hPion1P0N.SetName('1p0n_3p0n_' + names[j] + '_eff_' + regions[i])
-        hPion1P0N.GetXaxis().SetTitle('Tau Truth ' + variables[j] + ' [' + units[j] + ']')
+        hPion1P0N.GetXaxis().SetTitle("#font[42]{Visible True Tau}#kern[-0.5]{ }#it{p_{T}}#kern[-0.5]{ }#font[42]{[GeV/c]}")
         hPion1P0N.GetYaxis().SetRangeUser(0.0, 1.3)
     
         hPion1P0N.SetLineColor(ROOT.kGreen)
@@ -78,14 +78,14 @@ for i in range(3):
         text.SetTextFont(42)
         text.SetTextSize(0.04)
         text.SetTextAlign(13)
-        text.DrawLatex(0.13, 0.87, "#bf{#it{MAIA}} Work in Progress")
-        text.DrawLatex(0.13, 0.83, "Charged Tau Gun (No BIB)")
+        text.DrawLatex(0.13, 0.87, "#bf{#it{MAIA}} Detector Concept")
+        text.DrawLatex(0.13, 0.83, "Simulated Tau Gun (No BIB)")
         if i==0:
-            text.DrawLatex(0.13, 0.79, "Central Barrel Region (1.0<#theta<2.0 rad)")
+            text.DrawLatex(0.13, 0.79, "Central Barrel Region (1.0#kern[-0.6]{ }<#kern[-0.6]{ }#it{#theta}#kern[-0.6]{ }<#kern[-0.6]{ }2.0)")
         elif i==1:
-            text.DrawLatex(0.13, 0.79, "Transition Region (0.577<#theta<1.0 or 2.0<#theta<2.56 rad)")
+            text.DrawLatex(0.13, 0.79, "Transition Region (0.577#kern[-0.8]{ }<#kern[-0.8]{ }#it{#theta}#kern[-0.8]{ }<#kern[-0.8]{ }1.0#kern[-0.8]{ }or#kern[-0.8]{ }2.0#kern[-0.8]{ }<#kern[-0.8]{ }#it{#theta}#kern[-0.8]{ }<#kern[-0.8]{ }2.56)")
         else:
-            text.DrawLatex(0.13, 0.79, "Endcap Region (#theta<0.577 or #theta>2.56 rad)")
+            text.DrawLatex(0.13, 0.79, "Endcap Region (#it{#theta}#kern[-0.6]{ }<#kern[-0.6]{ }0.577#kern[-0.6]{ }or#kern[-0.6]{ }#it{#theta}#kern[-0.6]{ }>#kern[-0.6]{ }2.56)")
         c.Update()
         
         legend = ROOT.TLegend(0.70, 0.75, 0.92, 0.90)

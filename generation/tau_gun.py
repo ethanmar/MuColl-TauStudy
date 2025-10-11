@@ -9,14 +9,14 @@ from array import array
 from pyLCIO import UTIL, EVENT, IMPL, IO, IOIMPL
 
 # Output file
-outfile = "tau_gen_50k.slcio"
+outfile = "tau_gen_1000_5000.slcio"
 
 # Open output file
 wrt = IOIMPL.LCFactory.getInstance().createLCWriter( )
 wrt.open(outfile, EVENT.LCIO.WRITE_NEW) 
 
 # Number of events
-nevt = 50000
+nevt = 15000
 
 #========== particle properties ===================
 
@@ -24,8 +24,8 @@ random.seed()
 
 genstat  = 1
 
-pt_min = 20
-pt_max = 320
+pt_min = 1000
+pt_max = 5000
 
 theta_min = 8./180.*math.pi
 theta_max = 172./180.*math.pi

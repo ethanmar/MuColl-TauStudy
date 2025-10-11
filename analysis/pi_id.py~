@@ -1,0 +1,153 @@
+from pyLCIO import IOIMPL, EVENT, UTIL
+from ROOT import TH1F, TFile, TCanvas
+import math
+from argparse import ArgumentParser
+import os
+import numpy as np
+
+def getMatchedPDG(pfo, mc_particles):
+
+    # Get pfo observables
+    pfo_mom = pfo.getMomentum()
+    pfo_px = pfo_mom[0]
+    pfo_py = pfo_mom[1]
+    pfo_pz = pfo_mom[2]
+    pfo_pt = math.sqrt(pfo_px**2 + pfo_py**2)
+    pfo_theta = math.atan2(pfo_pt, pfo_pz)
+    pfo_phi = math.atan2(pfo_py, pfo_px)
+    pfo_energy = pfo.getEnergy()
+
+    # Loop over mc particles
+    deltaR_mc_particles = []
+    for mc_particle in mc_particles:
+
+        # Get mc particle observables
+        mc_mom = mc_particle.getMomentum()
+        mc_px = mc_mom[0]
+        mc_py = mc_mom[1]
+        mc_pz = mc_mom[2]
+        mc_pt = math.sqrt(mc_px**2 + mc_py**2)
+        mc_theta = math.atan2(mc_pt, mc_pz)
+        mc_phi = math.atan2(mc_py, mc_px)
+
+        # Compute deltaR
+        deltaTheta = pfo_theta - mc_theta
+        deltaPhi = pfo_phi - mc_phi
+        while (deltaPhi > math.pi):
+            deltaPhi -= 2*math.pi
+        while (deltaPhi < -math.pi):
+            deltaPhi += 2*math.pi
+        deltaR = math.sqrt(deltaTheta**2 + deltaPhi**2)
+
+        # Save deltaR if less than 0.1
+        if (deltaR < 0.1):
+            deltaR_mc_particles.append(mc_particle)
+
+    # Loop over mc particles with deltaR less than 0.1
+    min_energy_diff = 1e6
+    matched_pdg = 0
+    for deltaR_mc_particle in deltaR_mc_particles:
+
+        # Compute energy diference
+        mc_energy = deltaR_mc_particle.getEnergy()
+        energy_diff = abs(pfo_energy - mc_energy)
+
+        if (energy_diff < min_energy_diff):
+            min_energy_diff = energy_diff
+            matched_pdg = abs(deltaR_mc_particle.getPDG())
+
+    return matched_pdg
+        
+# Command line arguments
+parser = ArgumentParser()
+
+# Input file(s)
+parser.add_argument('--inputFile', type=str, default='reco_output.slcio')
+
+# Output file
+parser.add_argument('--outputFile', type=str, default='pi_id.root')
+
+args = parser.parse_args()
+
+# Initialize histograms
+hists = []
+
+# Centroid R
+hPiCentroidR = TH1F('pi_centroid_r', 'Pion Centroid Radius', 500, 1800, 4200)
+hists.append(hPiCentroidR)
+
+hElecCentroidR = TH1F('elec_centroid_r', 'Electron Centroid Radius', 500, 1800, 4200)
+hists.append(hElecCentroidR)
+
+# E/(E+H)
+hPiEOverEPlusH = TH1F('pi_e_over_e_plus_h', 'Pion E/(E+H)', 50, 0, 1.1)
+hists.append(hPiEOverEPlusH)
+
+hElecEOverEPlusH = TH1F('elec_e_over_e_plus_h', 'Electron E/(E+H)', 50, 0, 1.1)
+hists.append(hElecEOverEPlusH)
+
+# Detach histograms from file/directory
+for hist in hists:
+    hist.SetDirectory(0)
+
+# Check if input file is a directory or a single file    
+to_process = []
+
+if os.path.isdir(args.inputFile):
+    for r, d, f in os.walk(args.inputFile):
+        for file in f:
+            to_process.append(os.path.join(r, file))
+else:
+    to_process.append(args.inputFile)
+
+# Open input file(s)
+for file in to_process:
+    reader = IOIMPL.LCFactory.getInstance().createLCReader()
+    reader.open(file)
+
+    # Loop through events
+    for ievt, event in enumerate(reader):
+        
+        # Get collections
+        pfos = event.getCollection('PandoraPFOs')
+        clusters = event.getCollection('PandoraClusters')
+        mc_particles = event.getCollection('MCParticle')
+
+        for pfo in pfos:
+            matched_pdg = getMatchedPDG(pfo, mc_particles)
+            if (matched_pdg == 211 or matched_pdg == 11):
+                clusters = pfo.getClusters()
+                if (len(clusters) > 0):
+                    max_energy = 0
+                    max_energy_cluster = None
+                    for cluster in clusters:
+                        energy = cluster.getEnergy()
+                        if (energy > max_energy):
+                            max_energy = energy
+                            max_energy_cluster = cluster
+                    centroid = max_energy_cluster.getPosition()
+                    centroid_r = math.sqrt(centroid[0]**2 + centroid[1]**2 + centroid[2]**2)
+                    ecal = max_energy_cluster.getSubdetectorEnergies()[0]
+                    hcal = max_energy_cluster.getSubdetectorEnergies()[1]
+
+                    if (matched_pdg == 211):
+                        hPiCentroidR.Fill(centroid_r)
+                        hPiEOverEPlusH.Fill(ecal/(ecal+hcal))
+                    else:
+                        hElecCentroidR.Fill(centroid_r)
+                        hElecEOverEPlusH.Fill(ecal/(ecal+hcal))
+                    
+    reader.close()
+
+# Write to output file
+output_file = TFile(args.outputFile, 'RECREATE')
+for hist in hists:
+    hist.Write()
+output_file.Close()
+
+# Draw hists and save as PNG
+for hist in hists:
+    filename = hist.GetName() + '.png'
+    canvas = TCanvas()
+    hist.Draw()
+    canvas.SaveAs(filename)

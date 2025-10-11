@@ -239,26 +239,6 @@ for n, decay_mode in enumerate(decay_modes):
                             pt = math.sqrt(px**2 + py**2)
                             p = math.sqrt(pt**2 + pz**2)
 
-                            '''
-                            n_calo_hits = 0
-                            n_trkr_hits = 0
-
-                            clusters = pfo.getClusters()
-                            for cluster in clusters:
-                                if cluster is None:
-                                    continue
-                                calo_hits = cluster.getCalorimeterHits()
-                                n_calo_hits += len(calo_hits)
-                                
-                            if (pfo.getCharge() != 0):
-                                tracks = pfo.getTracks()
-                                for track in tracks:
-                                    trkr_hits = track.getTrackerHits()
-                                    n_trker_hits += len(trkr_hits)
-
-                            n_hits = n_calo_hits + n_trkr_hits
-                            '''
-                            
                             if str(pfo_type) in pfo_types:
                                 pfo_types[str(pfo_type)] += 1
                             else:
@@ -356,26 +336,6 @@ for n, decay_mode in enumerate(decay_modes):
                             pt = math.sqrt(px**2 + py**2)
                             p = math.sqrt(pt**2 + pz**2)
 
-                            '''
-                            n_calo_hits = 0
-                            n_trkr_hits = 0
-
-                            clusters = pfo.getClusters()
-                            for cluster in clusters:
-                                if cluster is None:
-                                    continue
-                                calo_hits = cluster.getCalorimeterHits()
-                                n_calo_hits += len(calo_hits)
-                                
-                            if (pfo.getCharge() != 0):
-                                tracks = pfo.getTracks()
-                                for track in tracks:
-                                    trkr_hits = track.getTrackerHits()
-                                    n_trker_hits += len(trkr_hits)
-
-                            n_hits = n_calo_hits + n_trkr_hits
-                            '''
-                            
                             if str(pfo_type) in pfo_types:
                                 pfo_types[str(pfo_type)] += 1
                             else:
@@ -455,26 +415,6 @@ for n, decay_mode in enumerate(decay_modes):
                             pz = pfo.getMomentum()[2]
                             pt = math.sqrt(px**2 + py**2)
                             p = math.sqrt(pt**2 + pz**2)
-
-                            ''' 
-                            n_calo_hits = 0
-                            n_trkr_hits = 0
-
-                            clusters = pfo.getClusters()
-                            for cluster in clusters:
-                                if cluster is None:
-                                    continue
-                                calo_hits = cluster.getCalorimeterHits()
-                                n_calo_hits += len(calo_hits)
-                                
-                            if (pfo.getCharge() != 0):
-                                tracks = pfo.getTracks()
-                                for track in tracks:
-                                    trkr_hits = track.getTrackerHits()
-                                    n_trker_hits += len(trkr_hits)
-
-                            n_hits = n_calo_hits + n_trkr_hits
-                            '''
                             
                             if str(pfo_type) in pfo_types:
                                 pfo_types[str(pfo_type)] += 1
@@ -564,26 +504,6 @@ for n, decay_mode in enumerate(decay_modes):
                             pz = pfo.getMomentum()[2]
                             pt = math.sqrt(px**2 + py**2)
                             p = math.sqrt(pt**2 + pz**2)
-
-                            '''
-                            n_calo_hits = 0
-                            n_trkr_hits = 0
-
-                            clusters = pfo.getClusters()
-                            for cluster in clusters:
-                                if cluster is None:
-                                    continue
-                                calo_hits = cluster.getCalorimeterHits()
-                                n_calo_hits += len(calo_hits)
-                                
-                            if (pfo.getCharge() != 0):
-                                tracks = pfo.getTracks()
-                                for track in tracks:
-                                    trkr_hits = track.getTrackerHits()
-                                    n_trker_hits += len(trkr_hits)
-
-                            n_hits = n_calo_hits + n_trkr_hits
-                            '''
                             
                             if pfo_type == 11:
                                 hEnergyPFOs_11.Fill(E)
