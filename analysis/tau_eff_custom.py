@@ -9,9 +9,69 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-from tau_mc_link import getDecayMode
+# Get tau decay mode
+def getDecayMode(mcTau):
 
-def getVisibleProperties(mc_tau):
+    '''
+    Decay modes for tau-:
+    0: -211, 16, (pi-, nu-tau) (10.82%)
+    1: -211, 16, 111 (pi-, pi0, nu-tau) (25.49%)
+    2: -211, 16, 111, 111 (pi-, pi0x2, nu-tau) (9.26%)
+    3: -211, 16, 111, 111, 111 (pi-, pi0x3, nu-tau) (1.04%)
+    4: -211, -211, 16, 211 (3-prong plus nu-tau) (8.99%)
+    5: -211, -211, 16, 111, 211 (3-prong plus pi0 and nu-tau) (2.74%)
+    6: -12, 11, 16 (nu-e-bar, e-, nu-tau) (17.82%)
+    7: -14, 13, 16 (nu-mu-bar, mu-, nu-tau) (17.39%) 
+    '''
+    # Initialize list to store daughter pdgs
+    daughter_pdgs = []
+
+    n_daughters = len(mcTau.getDaughters())
+    
+    # Loop over daughters and store pdgs
+    for daughter in mcTau.getDaughters():
+        daughter_pdgs.append(daughter.getPDG())
+
+    if (mcTau.getPDG() == 15):
+
+        # Sort daughter pdgs from lowest to highest
+        daughter_pdgs.sort()
+
+        # Hadronic decays
+        if (daughter_pdgs[0] == -211):
+            if (daughter_pdgs[1] == -211):
+                # 3-prong
+                if (daughter_pdgs[3] == 211):
+                    # 3-prong no neutrals
+                    return 4
+                elif (daughter_pdgs[3] == 111):
+                    # 3-prong with neutral
+                    return 5
+            elif (daughter_pdgs[1] == 16):
+                # 1-prong
+                if (n_daughters == 2):
+                    # No neutrals
+                    return 0
+                elif (daughter_pdgs[2] == 111):
+                    if (n_daughters == 3):
+                        # 1 neutral
+                        return 1
+                    elif (n_daughters == 4):
+                        # 2 neutrals
+                        return 2
+                    elif (n_daughters == 5):
+                        # 3 neutrals
+                        return 3
+        # Leptonic decays
+        elif (daughter_pdgs[0] == -12):
+            # Electron
+            return 6
+        else:
+            # Muon
+            return 7
+
+# Get visible 4-momentum
+def getVisibleP(mc_tau):
 
     E_vis = 0
     px_vis = 0
@@ -20,7 +80,6 @@ def getVisibleProperties(mc_tau):
     
     # Loop through mc daughters
     mc_daughters = mc_tau.getDaughters()
-
     for mc_daughter in mc_daughters:
 
         # Ignore neutrinos
@@ -34,35 +93,43 @@ def getVisibleProperties(mc_tau):
         py_vis += mc_daughter.getMomentum()[1]
         pz_vis += mc_daughter.getMomentum()[2]
 
+    # 4-momentum vector
     vis_properties = [E_vis, px_vis, py_vis, pz_vis]
     return vis_properties
 
+# Get transverse momentum
 def getPt(vis_props):
     return math.sqrt(vis_props[1]**2 + vis_props[2]**2)
 
+# Get 3-momentum magnitude
 def getP(vis_props):
     return math.sqrt(vis_props[1]**2 + vis_props[2]**2 + vis_props[3]**2)
 
+# Get polar angle
 def getTheta(vis_props):
     p = getP(vis_props)
     pz = vis_props[3]
     return math.acos(pz/p)
 
+# Get azimuthal angle
 def getPhi(vis_props):
     px = vis_props[1]
     pt = getPt(vis_props)
     return math.acos(px/pt)
 
+# Check if particle is a direct product of tau decay
 def isTauDaughter(mc_pi):
+
+    # Loop through parents
     parents = mc_pi.getParents()
     for parent in parents:
+        # Check if any parent is a tau
         if (abs(parent.getPDG()) == 15):
             return True
     return False
 
-def getNRecoPis(reco_tau, mc_particles):
-    # unique_matched_mc_pis = []
-    # duplicate_matched_mc_pis = []
+# Get number of matched reconstructed charged pions in a reconstructed tau
+def getNRecoChargedPis(reco_tau, mc_particles):
     matched_mc_pis = []
     
     # Loop through reco tau pfos
@@ -118,23 +185,37 @@ def getNRecoPis(reco_tau, mc_particles):
             matched_mc_pi = None
             for deltaR_mc_pi in deltaR_mc_pis:
                 
-                # Compute energy resolution
+                # Compute energy difference between mc particle and pfo
                 mc_energy = deltaR_mc_pi.getEnergy()
                 energy_dif = abs(pfo_energy - mc_energy)
 
-                # Mc pi matched if it has smallest energy resolution
+                # MC particle matched to pfo if it has smallest energy difference
                 if (energy_dif < min_energy_dif):
                     min_energy_dif = energy_dif
                     matched_mc_pi = deltaR_mc_pi
 
             if (matched_mc_pi is not None):
                 matched_mc_pis.append(matched_mc_pi)
-                '''if (matched_mc_pi not in unique_matched_mc_pis):
-                    unique_matched_mc_pis.append(matched_mc_pi)
-                else:
-                    duplicate_matched_mc_pis.append(matched_mc_pi)'''
 
     return len(matched_mc_pis)
+
+# Get number of reconstructed neutral pions in a reconstructed tau
+def getNRecoNeutralPis(reco_tau):
+
+    # Count number of neutral pions by counting number of photons
+    
+    n_reco_pi0s = 0
+
+    # Loop through reco tau pfos
+    pfos = reco_tau.getParticles()
+    for pfo in pfos:
+
+        # Tag photons
+        pfo_type = abs(pfo.getType())
+        if (pfo_type == 22):
+            n_reco_pi0s += 1
+
+    return n_reco_pi0s
 
 # Command line arguments
 parser = ArgumentParser()
@@ -183,6 +264,74 @@ hists.append(hLinkedTauPt1P0N_Transition)
 
 hLinkedTauPhi1P0N_Transition = TH1F('linked_1p0n_tau_phi_transition', 'Linked 1P0N Tau Phi (Transition)', 10, 0, math.pi)
 hists.append(hLinkedTauPhi1P0N_Transition)
+
+# 1P1N Linked
+hLinkedTauPt1P1N = TH1F('linked_1p1n_tau_pt', 'Linked 1P1N Tau Pt', 10, 0, 320)
+hists.append(hLinkedTauPt1P1N)
+
+hLinkedTauTheta1P1N = TH1F('linked_1p1n_tau_theta', 'Linked 1P1N Tau Theta', 10, 0, math.pi)
+hists.append(hLinkedTauTheta1P1N)
+
+hLinkedTauPhi1P1N = TH1F('linked_1p1n_tau_phi', 'Linked 1P1N Tau Phi', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P1N)
+
+hLinkedTauPt1P1N_Barrel = TH1F('linked_1p1n_tau_pt_barrel', 'Linked 1P1N Tau Pt (Barrel)', 10, 0, 320)
+hists.append(hLinkedTauPt1P1N_Barrel)
+
+hLinkedTauPhi1P1N_Barrel = TH1F('linked_1p1n_tau_phi_barrel', 'Linked 1P1N Tau Phi (Barrel)', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P1N_Barrel)
+
+hLinkedTauPt1P1N_CentBarrel = TH1F('linked_1p1n_tau_pt_centbarrel', 'Linked 1P1N Tau Pt (Central Barrel)', 10, 0, 320)
+hists.append(hLinkedTauPt1P1N_CentBarrel)
+
+hLinkedTauPhi1P1N_CentBarrel = TH1F('linked_1p1n_tau_phi_centbarrel', 'Linked 1P1N Tau Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P1N_CentBarrel)
+
+hLinkedTauPt1P1N_Endcap = TH1F('linked_1p1n_tau_pt_endcap', 'Linked 1P1N Tau Pt (Endcap)', 10, 0, 320)
+hists.append(hLinkedTauPt1P1N_Endcap)
+
+hLinkedTauPhi1P1N_Endcap = TH1F('linked_1p1n_tau_phi_endcap', 'Linked 1P1N Tau Phi (Endcap)', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P1N_Endcap)
+
+hLinkedTauPt1P1N_Transition = TH1F('linked_1p1n_tau_pt_transition', 'Linked 1P1N Tau Pt (Transition)', 10, 0, 320)
+hists.append(hLinkedTauPt1P1N_Transition)
+
+hLinkedTauPhi1P1N_Transition = TH1F('linked_1p1n_tau_phi_transition', 'Linked 1P1N Tau Phi (Transition)', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P1N_Transition)
+
+# 1P2N Linked
+hLinkedTauPt1P2N = TH1F('linked_1p2n_tau_pt', 'Linked 1P2N Tau Pt', 10, 0, 320)
+hists.append(hLinkedTauPt1P2N)
+
+hLinkedTauTheta1P2N = TH1F('linked_1p2n_tau_theta', 'Linked 1P2N Tau Theta', 10, 0, math.pi)
+hists.append(hLinkedTauTheta1P2N)
+
+hLinkedTauPhi1P2N = TH1F('linked_1p2n_tau_phi', 'Linked 1P2N Tau Phi', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P2N)
+
+hLinkedTauPt1P2N_Barrel = TH1F('linked_1p2n_tau_pt_barrel', 'Linked 1P2N Tau Pt (Barrel)', 10, 0, 320)
+hists.append(hLinkedTauPt1P2N_Barrel)
+
+hLinkedTauPhi1P2N_Barrel = TH1F('linked_1p2n_tau_phi_barrel', 'Linked 1P2N Tau Phi (Barrel)', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P2N_Barrel)
+
+hLinkedTauPt1P2N_CentBarrel = TH1F('linked_1p2n_tau_pt_centbarrel', 'Linked 1P2N Tau Pt (Central Barrel)', 10, 0, 320)
+hists.append(hLinkedTauPt1P2N_CentBarrel)
+
+hLinkedTauPhi1P2N_CentBarrel = TH1F('linked_1p2n_tau_phi_centbarrel', 'Linked 1P2N Tau Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P2N_CentBarrel)
+
+hLinkedTauPt1P2N_Endcap = TH1F('linked_1p2n_tau_pt_endcap', 'Linked 1P2N Tau Pt (Endcap)', 10, 0, 320)
+hists.append(hLinkedTauPt1P2N_Endcap)
+
+hLinkedTauPhi1P2N_Endcap = TH1F('linked_1p2n_tau_phi_endcap', 'Linked 1P2N Tau Phi (Endcap)', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P2N_Endcap)
+
+hLinkedTauPt1P2N_Transition = TH1F('linked_1p2n_tau_pt_transition', 'Linked 1P2N Tau Pt (Transition)', 10, 0, 320)
+hists.append(hLinkedTauPt1P2N_Transition)
+
+hLinkedTauPhi1P2N_Transition = TH1F('linked_1p2n_tau_phi_transition', 'Linked 1P2N Tau Phi (Transition)', 10, 0, math.pi)
+hists.append(hLinkedTauPhi1P2N_Transition)
 
 # 3P0N Linked
 hLinkedTauPt3P0N = TH1F('linked_3p0n_tau_pt', 'Linked 3P0N Tau Pt', 10, 0, 320)
@@ -251,6 +400,74 @@ hists.append(hTrueTauVisPt1P0N_Transition)
 
 hTrueTauVisPhi1P0N_Transition = TH1F('true_1p0n_tau_vis_phi_transition', 'True 1P0N Tau Visible Phi (Transition)', 10, 0, math.pi)
 hists.append(hTrueTauVisPhi1P0N_Transition)
+
+# 1P1N True
+hTrueTauVisPt1P1N = TH1F('true_1p1n_tau_vis_pt', 'True 1P1N Tau Visible Pt', 10, 0, 320)
+hists.append(hTrueTauVisPt1P1N)
+
+hTrueTauVisTheta1P1N = TH1F('true_1p1n_tau_vis_theta', 'True 1P1N Tau Visible Theta', 10, 0, math.pi)
+hists.append(hTrueTauVisTheta1P1N)
+
+hTrueTauVisPhi1P1N = TH1F('true_1p1n_tau_vis_phi', 'True 1P1N Tau Visible Phi', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P1N)
+
+hTrueTauVisPt1P1N_Barrel = TH1F('true_1p1n_tau_vis_pt_barrel', 'True 1P1N Tau Visible Pt (Barrel)', 10, 0, 320)
+hists.append(hTrueTauVisPt1P1N_Barrel)
+
+hTrueTauVisPhi1P1N_Barrel = TH1F('true_1p1n_tau_vis_phi_barrel', 'True 1P1N Tau Visible Phi (Barrel)', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P1N_Barrel)
+
+hTrueTauVisPt1P1N_CentBarrel = TH1F('true_1p1n_tau_vis_pt_centbarrel', 'True 1P1N Tau Visible Pt (Central Barrel)', 10, 0, 320)
+hists.append(hTrueTauVisPt1P1N_CentBarrel)
+
+hTrueTauVisPhi1P1N_CentBarrel = TH1F('true_1p1n_tau_vis_phi_centbarrel', 'True 1P1N Tau Visible Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P1N_CentBarrel)
+
+hTrueTauVisPt1P1N_Endcap = TH1F('true_1p1n_tau_vis_pt_endcap', 'True 1P1N Tau Visible Pt (Endcap)', 10, 0, 320)
+hists.append(hTrueTauVisPt1P1N_Endcap)
+
+hTrueTauVisPhi1P1N_Endcap = TH1F('true_1p1n_tau_vis_phi_endcap', 'True 1P1N Tau Visible Phi (Endcap)', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P1N_Endcap)
+
+hTrueTauVisPt1P1N_Transition = TH1F('true_1p1n_tau_vis_pt_transition', 'True 1P1N Tau Visible Pt (Transition)', 10, 0, 320)
+hists.append(hTrueTauVisPt1P1N_Transition)
+
+hTrueTauVisPhi1P1N_Transition = TH1F('true_1p1n_tau_vis_phi_transition', 'True 1P1N Tau Visible Phi (Transition)', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P1N_Transition)
+
+# 1P2N True
+hTrueTauVisPt1P2N = TH1F('true_1p2n_tau_vis_pt', 'True 1P2N Tau Visible Pt', 10, 0, 320)
+hists.append(hTrueTauVisPt1P2N)
+
+hTrueTauVisTheta1P2N = TH1F('true_1p2n_tau_vis_theta', 'True 1P2N Tau Visible Theta', 10, 0, math.pi)
+hists.append(hTrueTauVisTheta1P2N)
+
+hTrueTauVisPhi1P2N = TH1F('true_1p2n_tau_vis_phi', 'True 1P2N Tau Visible Phi', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P2N)
+
+hTrueTauVisPt1P2N_Barrel = TH1F('true_1p2n_tau_vis_pt_barrel', 'True 1P2N Tau Visible Pt (Barrel)', 10, 0, 320)
+hists.append(hTrueTauVisPt1P2N_Barrel)
+
+hTrueTauVisPhi1P2N_Barrel = TH1F('true_1p2n_tau_vis_phi_barrel', 'True 1P2N Tau Visible Phi (Barrel)', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P2N_Barrel)
+
+hTrueTauVisPt1P2N_CentBarrel = TH1F('true_1p2n_tau_vis_pt_centbarrel', 'True 1P2N Tau Visible Pt (Central Barrel)', 10, 0, 320)
+hists.append(hTrueTauVisPt1P2N_CentBarrel)
+
+hTrueTauVisPhi1P2N_CentBarrel = TH1F('true_1p2n_tau_vis_phi_centbarrel', 'True 1P2N Tau Visible Phi (Central Barrel)', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P2N_CentBarrel)
+
+hTrueTauVisPt1P2N_Endcap = TH1F('true_1p2n_tau_vis_pt_endcap', 'True 1P2N Tau Visible Pt (Endcap)', 10, 0, 320)
+hists.append(hTrueTauVisPt1P2N_Endcap)
+
+hTrueTauVisPhi1P2N_Endcap = TH1F('true_1p2n_tau_vis_phi_endcap', 'True 1P2N Tau Visible Phi (Endcap)', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P2N_Endcap)
+
+hTrueTauVisPt1P2N_Transition = TH1F('true_1p2n_tau_vis_pt_transition', 'True 1P2N Tau Visible Pt (Transition)', 10, 0, 320)
+hists.append(hTrueTauVisPt1P2N_Transition)
+
+hTrueTauVisPhi1P2N_Transition = TH1F('true_1p2n_tau_vis_phi_transition', 'True 1P2N Tau Visible Phi (Transition)', 10, 0, math.pi)
+hists.append(hTrueTauVisPhi1P2N_Transition)
 
 # 3P0N True
 hTrueTauVisPt3P0N = TH1F('true_3p0n_tau_vis_pt', 'True 3P0N Tau Visible Pt', 10, 0, 320)
@@ -322,11 +539,11 @@ for file in to_process:
         pfos = event.getCollection('PandoraPFOs')
         mc_particles = event.getCollection('MCParticle')
 
-        # True decay mode
+        # Initialize true tau decay mode
         decay_mode = -1
 
-        # Visible observables
-        vis_props = []
+        # Initialize visible observables
+        vis_P = []
         vis_pt = 0
         vis_theta = 0
         vis_phi = 0
@@ -341,10 +558,10 @@ for file in to_process:
                 decay_mode = getDecayMode(mc_particle)
 
                 # Get visible properties
-                vis_props = getVisibleProperties(mc_particle)
-                vis_pt = getPt(vis_props)
-                vis_theta = getTheta(vis_props)
-                vis_phi = getPhi(vis_props)
+                vis_P = getVisibleP(mc_particle)
+                vis_pt = getPt(vis_P)
+                vis_theta = getTheta(vis_P)
+                vis_phi = getPhi(vis_P)
 
                 # Fill true 1P0N hists
                 if (decay_mode == 0):
@@ -369,6 +586,52 @@ for file in to_process:
                         hTrueTauVisPt1P0N_Endcap.Fill(vis_pt)
                         hTrueTauVisPhi1P0N_Endcap.Fill(vis_phi)
 
+                # Fill true 1P1N hists
+                elif (decay_mode == 1):
+                    n_1p1n_true += 1
+                    hTrueTauVisPt1P1N.Fill(vis_pt)
+                    hTrueTauVisTheta1P1N.Fill(vis_theta)
+                    hTrueTauVisPhi1P1N.Fill(vis_phi)
+
+                    if (vis_theta > 0.70 and vis_theta < 2.45):
+                        hTrueTauVisPt1P1N_Barrel.Fill(vis_pt)
+                        hTrueTauVisPhi1P1N_Barrel.Fill(vis_phi)
+
+                    if (vis_theta > 1 and vis_theta < 2):
+                        hTrueTauVisPt1P1N_CentBarrel.Fill(vis_pt)
+                        hTrueTauVisPhi1P1N_CentBarrel.Fill(vis_phi)
+
+                    elif ((vis_theta > 0.577 and vis_theta < 1.0) or (vis_theta > 2.0 and vis_theta < 2.56)):
+                        hTrueTauVisPt1P1N_Transition.Fill(vis_pt)
+                        hTrueTauVisPhi1P1N_Transition.Fill(vis_phi)
+
+                    elif (vis_theta < 0.577 or vis_theta > 2.56):
+                        hTrueTauVisPt1P1N_Endcap.Fill(vis_pt)
+                        hTrueTauVisPhi1P1N_Endcap.Fill(vis_phi)
+
+                # Fill true 1P2N hists
+                elif (decay_mode == 2):
+                    n_1p2n_true += 1
+                    hTrueTauVisPt1P2N.Fill(vis_pt)
+                    hTrueTauVisTheta1P2N.Fill(vis_theta)
+                    hTrueTauVisPhi1P2N.Fill(vis_phi)
+
+                    if (vis_theta > 0.70 and vis_theta < 2.45):
+                        hTrueTauVisPt1P2N_Barrel.Fill(vis_pt)
+                        hTrueTauVisPhi1P2N_Barrel.Fill(vis_phi)
+
+                    if (vis_theta > 1 and vis_theta < 2):
+                        hTrueTauVisPt1P2N_CentBarrel.Fill(vis_pt)
+                        hTrueTauVisPhi1P2N_CentBarrel.Fill(vis_phi)
+
+                    elif ((vis_theta > 0.577 and vis_theta < 1.0) or (vis_theta > 2.0 and vis_theta < 2.56)):
+                        hTrueTauVisPt1P2N_Transition.Fill(vis_pt)
+                        hTrueTauVisPhi1P2N_Transition.Fill(vis_phi)
+
+                    elif (vis_theta < 0.577 or vis_theta > 2.56):
+                        hTrueTauVisPt1P2N_Endcap.Fill(vis_pt)
+                        hTrueTauVisPhi1P2N_Endcap.Fill(vis_phi)
+                        
                 # Fill true 3P0N hists
                 elif (decay_mode == 4):
                     n_3p0n_true += 1
@@ -395,8 +658,11 @@ for file in to_process:
         # Loop through reco taus
         for tau in taus:
 
-            # Get number of matched pions
-            n_matched_pis = getNRecoPis(tau, mc_particles)
+            # Get number of matched charged pions
+            n_matched_pis = getNRecoChargedPis(tau, mc_particles)
+
+            # Get number of neutral pions
+            n_pi0s = getNRecoNeutralPis(tau)
 
             if (decay_mode == 0 or decay_mode == 4):
                 if n_matched_pis <= 4:
@@ -427,6 +693,50 @@ for file in to_process:
                 elif (vis_theta < 0.577 or vis_theta > 2.56):
                     hLinkedTauPt1P0N_Endcap.Fill(vis_pt)
                     hLinkedTauPhi1P0N_Endcap.Fill(vis_phi)
+
+            # Fill linked 1P1N hists
+            elif (n_matched_pis == 1 and n_pi0s == 1 and decay_mode == 1):
+                hLinkedTauPt1P1N.Fill(vis_pt)
+                hLinkedTauTheta1P1N.Fill(vis_theta)
+                hLinkedTauPhi1P1N.Fill(vis_phi)
+
+                if (vis_theta > 0.70 and vis_theta < 2.45):
+                    hLinkedTauPt1P1N_Barrel.Fill(vis_pt)
+                    hLinkedTauPhi1P1N_Barrel.Fill(vis_phi)
+
+                if (vis_theta > 1 and vis_theta < 2):
+                    hLinkedTauPt1P1N_CentBarrel.Fill(vis_pt)
+                    hLinkedTauPhi1P1N_CentBarrel.Fill(vis_phi)
+
+                elif ((vis_theta > 0.577 and vis_theta < 1.0) or (vis_theta > 2.0 and vis_theta < 2.56)):
+                    hLinkedTauPt1P1N_Transition.Fill(vis_pt)
+                    hLinkedTauPhi1P1N_Transition.Fill(vis_phi)
+
+                elif (vis_theta < 0.577 or vis_theta > 2.56):
+                    hLinkedTauPt1P1N_Endcap.Fill(vis_pt)
+                    hLinkedTauPhi1P1N_Endcap.Fill(vis_phi)
+
+            # Fill linked 1P2N hists
+            elif (n_matched_pis == 1 and n_pi0s == 2 and decay_mode == 2):
+                hLinkedTauPt1P2N.Fill(vis_pt)
+                hLinkedTauTheta1P2N.Fill(vis_theta)
+                hLinkedTauPhi1P2N.Fill(vis_phi)
+
+                if (vis_theta > 0.70 and vis_theta < 2.45):
+                    hLinkedTauPt1P2N_Barrel.Fill(vis_pt)
+                    hLinkedTauPhi1P2N_Barrel.Fill(vis_phi)
+
+                if (vis_theta > 1 and vis_theta < 2):
+                    hLinkedTauPt1P2N_CentBarrel.Fill(vis_pt)
+                    hLinkedTauPhi1P2N_CentBarrel.Fill(vis_phi)
+
+                elif ((vis_theta > 0.577 and vis_theta < 1.0) or (vis_theta > 2.0 and vis_theta < 2.56)):
+                    hLinkedTauPt1P2N_Transition.Fill(vis_pt)
+                    hLinkedTauPhi1P2N_Transition.Fill(vis_phi)
+
+                elif (vis_theta < 0.577 or vis_theta > 2.56):
+                    hLinkedTauPt1P2N_Endcap.Fill(vis_pt)
+                    hLinkedTauPhi1P2N_Endcap.Fill(vis_phi)
 
             # Fill linked 3P0N hists
             elif (n_matched_pis == 3 and decay_mode == 4):
@@ -586,7 +896,229 @@ hPhiEff1P0N_Transition.GetYaxis().SetTitle('#epsilon')
 hPhiEff1P0N_Transition.SetStats(0)
 hists.append(hPhiEff1P0N_Transition)
 
-# Create reco-three-prong efficiency hists
+# Create 1P1N efficiency hists
+hPtEff1P1N = hLinkedTauPt1P1N.Clone('1p1n_tau_pt_eff')
+hPtEff1P1N.Divide(hPtEff1P1N, hTrueTauVisPt1P1N, 1, 1, 'B')
+hPtEff1P1N.SetLineColor(6)
+hPtEff1P1N.SetLineWidth(2)
+hPtEff1P1N.SetTitle('1P1N Reconstruction Efficiency vs Pt')
+hPtEff1P1N.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P1N.GetYaxis().SetTitle('#epsilon')
+hPtEff1P1N.SetStats(1)
+hists.append(hPtEff1P1N)
+
+hThetaEff1P1N = hLinkedTauTheta1P1N.Clone('1p1n_tau_theta_eff')
+hThetaEff1P1N.Divide(hThetaEff1P1N, hTrueTauVisTheta1P1N, 1, 1, 'B')
+hThetaEff1P1N.SetLineColor(7)
+hThetaEff1P1N.SetLineWidth(2)
+hThetaEff1P1N.SetTitle('1P1N Reconstruction Efficiency vs Theta')
+hThetaEff1P1N.GetXaxis().SetTitle('True Visible Tau #theta [rad]')
+hThetaEff1P1N.GetYaxis().SetTitle('#epsilon')
+hThetaEff1P1N.SetStats(1)
+hists.append(hThetaEff1P1N)
+
+hPhiEff1P1N = hLinkedTauPhi1P1N.Clone('1p1n_tau_phi_eff')
+hPhiEff1P1N.Divide(hPhiEff1P1N, hTrueTauVisPhi1P1N, 1, 1, 'B')
+hPhiEff1P1N.SetLineColor(418)
+hPhiEff1P1N.SetLineWidth(2)
+hPhiEff1P1N.SetTitle('1P1N Reconstruction Efficiency vs Phi')
+hPhiEff1P1N.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P1N.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P1N.SetStats(1)
+hists.append(hPhiEff1P1N)
+
+hPtEff1P1N_Barrel = hLinkedTauPt1P1N_Barrel.Clone('1p1n_tau_pt_eff_barrel')
+hPtEff1P1N_Barrel.Divide(hPtEff1P1N_Barrel, hTrueTauVisPt1P1N_Barrel, 1, 1, 'B')
+hPtEff1P1N_Barrel.SetLineColor(6)
+hPtEff1P1N_Barrel.SetLineWidth(2)
+hPtEff1P1N_Barrel.SetTitle('1P1N Reconstruction Efficiency vs Pt (Barrel)')
+hPtEff1P1N_Barrel.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P1N_Barrel.GetYaxis().SetTitle('#epsilon')
+hPtEff1P1N_Barrel.SetStats(1)
+hists.append(hPtEff1P1N_Barrel)
+
+hPhiEff1P1N_Barrel = hLinkedTauPhi1P1N_Barrel.Clone('1p1n_tau_phi_eff_barrel')
+hPhiEff1P1N_Barrel.Divide(hPhiEff1P1N_Barrel, hTrueTauVisPhi1P1N_Barrel, 1, 1, 'B')
+hPhiEff1P1N_Barrel.SetLineColor(418)
+hPhiEff1P1N_Barrel.SetLineWidth(2)
+hPhiEff1P1N_Barrel.SetTitle('1P1N Reconstruction Efficiency vs Phi (Barrel)')
+hPhiEff1P1N_Barrel.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P1N_Barrel.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P1N_Barrel.SetStats(1)
+hists.append(hPhiEff1P1N_Barrel)
+
+hPtEff1P1N_CentBarrel = hLinkedTauPt1P1N_CentBarrel.Clone('1p1n_tau_pt_eff_centbarrel')
+hPtEff1P1N_CentBarrel.Divide(hPtEff1P1N_CentBarrel, hTrueTauVisPt1P1N_CentBarrel, 1, 1, 'B')
+hPtEff1P1N_CentBarrel.SetLineColor(6)
+hPtEff1P1N_CentBarrel.SetLineWidth(2)
+hPtEff1P1N_CentBarrel.SetTitle('1P1N Reconstruction Efficiency vs Pt (Central Barrel)')
+hPtEff1P1N_CentBarrel.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P1N_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPtEff1P1N_CentBarrel.SetStats(1)
+hists.append(hPtEff1P1N_CentBarrel)
+
+hPhiEff1P1N_CentBarrel = hLinkedTauPhi1P1N_CentBarrel.Clone('1p1n_tau_phi_eff_centbarrel')
+hPhiEff1P1N_CentBarrel.Divide(hPhiEff1P1N_CentBarrel, hTrueTauVisPhi1P1N_CentBarrel, 1, 1, 'B')
+hPhiEff1P1N_CentBarrel.SetLineColor(418)
+hPhiEff1P1N_CentBarrel.SetLineWidth(2)
+hPhiEff1P1N_CentBarrel.SetTitle('1P1N Reconstruction Efficiency vs Phi (Central Barrel)')
+hPhiEff1P1N_CentBarrel.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P1N_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P1N_CentBarrel.SetStats(1)
+hists.append(hPhiEff1P1N_CentBarrel)
+
+hPtEff1P1N_Endcap = hLinkedTauPt1P1N_Endcap.Clone('1p1n_tau_pt_eff_endcap')
+hPtEff1P1N_Endcap.Divide(hPtEff1P1N_Endcap, hTrueTauVisPt1P1N_Endcap, 1, 1, 'B')
+hPtEff1P1N_Endcap.SetLineColor(6)
+hPtEff1P1N_Endcap.SetLineWidth(2)
+hPtEff1P1N_Endcap.SetTitle('1P1N Reconstruction Efficiency vs Pt (Endcap)')
+hPtEff1P1N_Endcap.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P1N_Endcap.GetYaxis().SetTitle('#epsilon')
+hPtEff1P1N_Endcap.SetStats(1)
+hists.append(hPtEff1P1N_Endcap)
+
+hPhiEff1P1N_Endcap = hLinkedTauPhi1P1N_Endcap.Clone('1p1n_tau_phi_eff_endcap')
+hPhiEff1P1N_Endcap.Divide(hPhiEff1P1N_Endcap, hTrueTauVisPhi1P1N_Endcap, 1, 1, 'B')
+hPhiEff1P1N_Endcap.SetLineColor(418)
+hPhiEff1P1N_Endcap.SetLineWidth(2)
+hPhiEff1P1N_Endcap.SetTitle('1P1N Reconstruction Efficiency vs Phi (Endcap)')
+hPhiEff1P1N_Endcap.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P1N_Endcap.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P1N_Endcap.SetStats(1)
+hists.append(hPhiEff1P1N_Endcap)
+
+hPtEff1P1N_Transition = hLinkedTauPt1P1N_Transition.Clone('1p1n_tau_pt_eff_transition')
+hPtEff1P1N_Transition.Divide(hPtEff1P1N_Transition, hTrueTauVisPt1P1N_Transition, 1, 1, 'B')
+hPtEff1P1N_Transition.SetLineColor(6)
+hPtEff1P1N_Transition.SetLineWidth(2)
+hPtEff1P1N_Transition.SetTitle('1P1N Reconstruction Efficiency vs Pt (Transition)')
+hPtEff1P1N_Transition.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P1N_Transition.GetYaxis().SetTitle('#epsilon')
+hPtEff1P1N_Transition.SetStats(1)
+hists.append(hPtEff1P1N_Transition)
+
+hPhiEff1P1N_Transition = hLinkedTauPhi1P1N_Transition.Clone('1p1n_tau_phi_eff_transition')
+hPhiEff1P1N_Transition.Divide(hPhiEff1P1N_Transition, hTrueTauVisPhi1P1N_Transition, 1, 1, 'B')
+hPhiEff1P1N_Transition.SetLineColor(418)
+hPhiEff1P1N_Transition.SetLineWidth(2)
+hPhiEff1P1N_Transition.SetTitle('1P1N Reconstruction Efficiency vs Phi (Transition)')
+hPhiEff1P1N_Transition.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P1N_Transition.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P1N_Transition.SetStats(1)
+hists.append(hPhiEff1P1N_Transition)
+
+# Create 1P2N efficiency hists
+hPtEff1P2N = hLinkedTauPt1P2N.Clone('1p2n_tau_pt_eff')
+hPtEff1P2N.Divide(hPtEff1P2N, hTrueTauVisPt1P2N, 1, 1, 'B')
+hPtEff1P2N.SetLineColor(6)
+hPtEff1P2N.SetLineWidth(2)
+hPtEff1P2N.SetTitle('1P2N Reconstruction Efficiency vs Pt')
+hPtEff1P2N.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P2N.GetYaxis().SetTitle('#epsilon')
+hPtEff1P2N.SetStats(2)
+hists.append(hPtEff1P2N)
+
+hThetaEff1P2N = hLinkedTauTheta1P2N.Clone('1p2n_tau_theta_eff')
+hThetaEff1P2N.Divide(hThetaEff1P2N, hTrueTauVisTheta1P2N, 1, 1, 'B')
+hThetaEff1P2N.SetLineColor(7)
+hThetaEff1P2N.SetLineWidth(2)
+hThetaEff1P2N.SetTitle('1P2N Reconstruction Efficiency vs Theta')
+hThetaEff1P2N.GetXaxis().SetTitle('True Visible Tau #theta [rad]')
+hThetaEff1P2N.GetYaxis().SetTitle('#epsilon')
+hThetaEff1P2N.SetStats(2)
+hists.append(hThetaEff1P2N)
+
+hPhiEff1P2N = hLinkedTauPhi1P2N.Clone('1p2n_tau_phi_eff')
+hPhiEff1P2N.Divide(hPhiEff1P2N, hTrueTauVisPhi1P2N, 1, 1, 'B')
+hPhiEff1P2N.SetLineColor(418)
+hPhiEff1P2N.SetLineWidth(2)
+hPhiEff1P2N.SetTitle('1P2N Reconstruction Efficiency vs Phi')
+hPhiEff1P2N.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P2N.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P2N.SetStats(2)
+hists.append(hPhiEff1P2N)
+
+hPtEff1P2N_Barrel = hLinkedTauPt1P2N_Barrel.Clone('1p2n_tau_pt_eff_barrel')
+hPtEff1P2N_Barrel.Divide(hPtEff1P2N_Barrel, hTrueTauVisPt1P2N_Barrel, 1, 1, 'B')
+hPtEff1P2N_Barrel.SetLineColor(6)
+hPtEff1P2N_Barrel.SetLineWidth(2)
+hPtEff1P2N_Barrel.SetTitle('1P2N Reconstruction Efficiency vs Pt (Barrel)')
+hPtEff1P2N_Barrel.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P2N_Barrel.GetYaxis().SetTitle('#epsilon')
+hPtEff1P2N_Barrel.SetStats(2)
+hists.append(hPtEff1P2N_Barrel)
+
+hPhiEff1P2N_Barrel = hLinkedTauPhi1P2N_Barrel.Clone('1p2n_tau_phi_eff_barrel')
+hPhiEff1P2N_Barrel.Divide(hPhiEff1P2N_Barrel, hTrueTauVisPhi1P2N_Barrel, 1, 1, 'B')
+hPhiEff1P2N_Barrel.SetLineColor(418)
+hPhiEff1P2N_Barrel.SetLineWidth(2)
+hPhiEff1P2N_Barrel.SetTitle('1P2N Reconstruction Efficiency vs Phi (Barrel)')
+hPhiEff1P2N_Barrel.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P2N_Barrel.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P2N_Barrel.SetStats(2)
+hists.append(hPhiEff1P2N_Barrel)
+
+hPtEff1P2N_CentBarrel = hLinkedTauPt1P2N_CentBarrel.Clone('1p2n_tau_pt_eff_centbarrel')
+hPtEff1P2N_CentBarrel.Divide(hPtEff1P2N_CentBarrel, hTrueTauVisPt1P2N_CentBarrel, 1, 1, 'B')
+hPtEff1P2N_CentBarrel.SetLineColor(6)
+hPtEff1P2N_CentBarrel.SetLineWidth(2)
+hPtEff1P2N_CentBarrel.SetTitle('1P2N Reconstruction Efficiency vs Pt (Central Barrel)')
+hPtEff1P2N_CentBarrel.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P2N_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPtEff1P2N_CentBarrel.SetStats(2)
+hists.append(hPtEff1P2N_CentBarrel)
+
+hPhiEff1P2N_CentBarrel = hLinkedTauPhi1P2N_CentBarrel.Clone('1p2n_tau_phi_eff_centbarrel')
+hPhiEff1P2N_CentBarrel.Divide(hPhiEff1P2N_CentBarrel, hTrueTauVisPhi1P2N_CentBarrel, 1, 1, 'B')
+hPhiEff1P2N_CentBarrel.SetLineColor(418)
+hPhiEff1P2N_CentBarrel.SetLineWidth(2)
+hPhiEff1P2N_CentBarrel.SetTitle('1P2N Reconstruction Efficiency vs Phi (Central Barrel)')
+hPhiEff1P2N_CentBarrel.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P2N_CentBarrel.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P2N_CentBarrel.SetStats(2)
+hists.append(hPhiEff1P2N_CentBarrel)
+
+hPtEff1P2N_Endcap = hLinkedTauPt1P2N_Endcap.Clone('1p2n_tau_pt_eff_endcap')
+hPtEff1P2N_Endcap.Divide(hPtEff1P2N_Endcap, hTrueTauVisPt1P2N_Endcap, 1, 1, 'B')
+hPtEff1P2N_Endcap.SetLineColor(6)
+hPtEff1P2N_Endcap.SetLineWidth(2)
+hPtEff1P2N_Endcap.SetTitle('1P2N Reconstruction Efficiency vs Pt (Endcap)')
+hPtEff1P2N_Endcap.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P2N_Endcap.GetYaxis().SetTitle('#epsilon')
+hPtEff1P2N_Endcap.SetStats(2)
+hists.append(hPtEff1P2N_Endcap)
+
+hPhiEff1P2N_Endcap = hLinkedTauPhi1P2N_Endcap.Clone('1p2n_tau_phi_eff_endcap')
+hPhiEff1P2N_Endcap.Divide(hPhiEff1P2N_Endcap, hTrueTauVisPhi1P2N_Endcap, 1, 1, 'B')
+hPhiEff1P2N_Endcap.SetLineColor(418)
+hPhiEff1P2N_Endcap.SetLineWidth(2)
+hPhiEff1P2N_Endcap.SetTitle('1P2N Reconstruction Efficiency vs Phi (Endcap)')
+hPhiEff1P2N_Endcap.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P2N_Endcap.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P2N_Endcap.SetStats(2)
+hists.append(hPhiEff1P2N_Endcap)
+
+hPtEff1P2N_Transition = hLinkedTauPt1P2N_Transition.Clone('1p2n_tau_pt_eff_transition')
+hPtEff1P2N_Transition.Divide(hPtEff1P2N_Transition, hTrueTauVisPt1P2N_Transition, 1, 1, 'B')
+hPtEff1P2N_Transition.SetLineColor(6)
+hPtEff1P2N_Transition.SetLineWidth(2)
+hPtEff1P2N_Transition.SetTitle('1P2N Reconstruction Efficiency vs Pt (Transition)')
+hPtEff1P2N_Transition.GetXaxis().SetTitle('True Visible Tau Pt [GeV/c]')
+hPtEff1P2N_Transition.GetYaxis().SetTitle('#epsilon')
+hPtEff1P2N_Transition.SetStats(2)
+hists.append(hPtEff1P2N_Transition)
+
+hPhiEff1P2N_Transition = hLinkedTauPhi1P2N_Transition.Clone('1p2n_tau_phi_eff_transition')
+hPhiEff1P2N_Transition.Divide(hPhiEff1P2N_Transition, hTrueTauVisPhi1P2N_Transition, 1, 1, 'B')
+hPhiEff1P2N_Transition.SetLineColor(418)
+hPhiEff1P2N_Transition.SetLineWidth(2)
+hPhiEff1P2N_Transition.SetTitle('1P2N Reconstruction Efficiency vs Phi (Transition)')
+hPhiEff1P2N_Transition.GetXaxis().SetTitle('True Visible Tau #phi [rad]')
+hPhiEff1P2N_Transition.GetYaxis().SetTitle('#epsilon')
+hPhiEff1P2N_Transition.SetStats(2)
+hists.append(hPhiEff1P2N_Transition)
+
+# Create 3P0N efficiency hists
 hPtEff3P0N = hLinkedTauPt3P0N.Clone('3p0n_tau_pt_eff')
 hPtEff3P0N.Divide(hPtEff3P0N, hTrueTauVisPt3P0N, 1, 1, 'B')
 hPtEff3P0N.SetLineColor(6)

@@ -70,6 +70,21 @@ def fromTau(mc_particle):
 
     return from_tau
 
+def getTheta(pfo):
+    mom = pfo.getMomentum()
+    px = mom[0]
+    py = mom[1]
+    pz = mom[2]
+    pt = math.sqrt(px**2 + py**2)
+    theta = math.atan2(pt, pz)
+    return theta
+
+def getLayer(r):
+    # 50 layers in ECAL barrel (5.35 mm)
+    # 50 layers in ECAL endcap (36.3 mm)
+    # 75 layers in HCAL barrel (26.5 mm)
+    # 75 layers in HCAL endcap (26.5 mm)
+
 # Command line arguments
 parser = ArgumentParser()
 
@@ -84,19 +99,74 @@ args = parser.parse_args()
 # Initialize histograms
 hists = []
 
-# Centroid R
-hPiCentroidR = TH1F('pi_centroid_r', 'Pion Centroid Radius', 500, 1800, 4200)
-hists.append(hPiCentroidR)
+# Central Barrel
 
-hElecCentroidR = TH1F('elec_centroid_r', 'Electron Centroid Radius', 500, 1800, 4200)
-hists.append(hElecCentroidR)
+# Centroid R
+hPiCentroidRCentralBarrel = TH1F('pi_centroid_r_cent_barrel', 'Pion Centroid Radius (Central Barrel)', 500, 1800, 4200)
+hists.append(hPiCentroidRCentralBarrel)
+
+hElecCentroidRCentralBarrel = TH1F('elec_centroid_r_cent_barrel', 'Electron Centroid Radius (Central Barrel)', 500, 1800, 4200)
+hists.append(hElecCentroidRCentralBarrel)
 
 # E/(E+H)
-hPiEOverEPlusH = TH1F('pi_e_over_e_plus_h', 'Pion E/(E+H)', 50, 0, 1.1)
-hists.append(hPiEOverEPlusH)
+hPiEOverEPlusHCentralBarrel = TH1F('pi_e_over_e_plus_h_cent_barrel', 'Pion E/(E+H) (Central Barrel)', 50, 0, 1.1)
+hists.append(hPiEOverEPlusHCentralBarrel)
 
-hElecEOverEPlusH = TH1F('elec_e_over_e_plus_h', 'Electron E/(E+H)', 50, 0, 1.1)
-hists.append(hElecEOverEPlusH)
+hElecEOverEPlusHCentralBarrel = TH1F('elec_e_over_e_plus_h_cent_barrel', 'Electron E/(E+H) (Central Barrel)', 50, 0, 1.1)
+hists.append(hElecEOverEPlusHCentralBarrel)
+
+# Shower start layer
+hPiShowerStartLayerCentralBarrel = TH1F('pi_shower_start_layer_cent_barrel', 'Pion Shower Start Layer (Central Barrel)', 21, 0, 20)
+hists.append(hPiShowerStartLayerCentralBarrel)
+
+hElecShowerStartLayerCentralBarrel = TH1F('elec_shower_start_layer_cent_barrel', 'Electron Shower Start Layer (Central Barrel)', 21, 0, 20)
+hists.append(hElecShowerStartLayerCentralBarrel)
+
+# Transition
+
+# Centroid R
+hPiCentroidRTransition = TH1F('pi_centroid_r_transition', 'Pion Centroid Radius (Transition)', 500, 1800, 4200)
+hists.append(hPiCentroidRTransition)
+
+hElecCentroidRTransition = TH1F('elec_centroid_r_transition', 'Electron Centroid Radius (Transition)', 500, 1800, 4200)
+hists.append(hElecCentroidRTransition)
+
+# E/(E+H)
+hPiEOverEPlusHTransition = TH1F('pi_e_over_e_plus_h_transition', 'Pion E/(E+H) (Transition)', 50, 0, 1.1)
+hists.append(hPiEOverEPlusHTransition)
+
+hElecEOverEPlusHTransition = TH1F('elec_e_over_e_plus_h_transition', 'Electron E/(E+H) (Transition)', 50, 0, 1.1)
+hists.append(hElecEOverEPlusHTransition)
+
+# Shower start layer
+hPiShowerStartLayerTransition = TH1F('pi_shower_start_layer_transition', 'Pion Shower Start Layer (Transition)', 21, 0, 20)
+hists.append(hPiShowerStartLayerTransition)
+
+hElecShowerStartLayerTransition = TH1F('elec_shower_start_layer_transition', 'Electron Shower Start Layer (Transition)', 21, 0, 20)
+hists.append(hElecShowerStartLayerTransition)
+
+# Endcap
+
+# Centroid R
+hPiCentroidREndcap = TH1F('pi_centroid_r_endcap', 'Pion Centroid Radius (Endcap)', 500, 1800, 4200)
+hists.append(hPiCentroidREndcap)
+
+hElecCentroidREndcap = TH1F('elec_centroid_r_endcap', 'Electron Centroid Radius (Endcap)', 500, 1800, 4200)
+hists.append(hElecCentroidREndcap)
+
+# E/(E+H)
+hPiEOverEPlusHEndcap = TH1F('pi_e_over_e_plus_h_endcap', 'Pion E/(E+H) (Endcap)', 50, 0, 1.1)
+hists.append(hPiEOverEPlusHEndcap)
+
+hElecEOverEPlusHEndcap = TH1F('elec_e_over_e_plus_h_endcap', 'Electron E/(E+H) (Endcap)', 50, 0, 1.1)
+hists.append(hElecEOverEPlusHEndcap)
+
+# Shower start layer
+hPiShowerStartLayerEndcap = TH1F('pi_shower_start_layer_endcap', 'Pion Shower Start Layer (Endcap)', 21, 0, 20)
+hists.append(hPiShowerStartLayerEndcap)
+
+hElecShowerStartLayerEndcap = TH1F('elec_shower_start_layer_endcap', 'Electron Shower Start Layer (Endcap)', 21, 0, 20)
+hists.append(hElecShowerStartLayerEndcap)
 
 # Detach histograms from file/directory
 for hist in hists:
@@ -127,6 +197,7 @@ for file in to_process:
 
         for pfo in pfos:
             pfo_pdg = abs(pfo.getType())
+            pfo_theta = getTheta(pfo)
             if (pfo_pdg == 11 or pfo_pdg == 211):
                 matched_mc_particle = getMatchedMCParticle(pfo, mc_particles)
                 if (matched_mc_particle):
@@ -147,11 +218,25 @@ for file in to_process:
                             hcal = max_energy_cluster.getSubdetectorEnergies()[1]
 
                             if (matched_pdg == 211):
-                                hPiCentroidR.Fill(centroid_r)
-                                hPiEOverEPlusH.Fill(ecal/(ecal+hcal))
+                                if (pfo_theta > 1 and pfo_theta < 2):
+                                    hPiCentroidRCentralBarrel.Fill(centroid_r)
+                                    hPiEOverEPlusHCentralBarrel.Fill(ecal/(ecal+hcal))
+                                elif ((pfo_theta > 0.577 and pfo_theta < 1.0) or (pfo_theta > 2.0 and pfo_theta < 2.56)):
+                                    hPiCentroidRTransition.Fill(centroid_r)
+                                    hPiEOverEPlusHTransition.Fill(ecal/(ecal+hcal))
+                                elif (pfo_theta < 0.577 or pfo_theta > 2.56):
+                                    hPiCentroidREndcap.Fill(centroid_r)
+                                    hPiEOverEPlusHEndcap.Fill(ecal/(ecal+hcal))
                             else:
-                                hElecCentroidR.Fill(centroid_r)
-                                hElecEOverEPlusH.Fill(ecal/(ecal+hcal))
+                                if (pfo_theta > 1 and pfo_theta < 2):
+                                    hElecCentroidRCentralBarrel.Fill(centroid_r)
+                                    hElecEOverEPlusHCentralBarrel.Fill(ecal/(ecal+hcal))
+                                elif ((pfo_theta > 0.577 and pfo_theta < 1.0) or (pfo_theta > 2.0 and pfo_theta < 2.56)):
+                                    hElecCentroidRTransition.Fill(centroid_r)
+                                    hElecEOverEPlusHTransition.Fill(ecal/(ecal+hcal))
+                                elif (pfo_theta < 0.577 or pfo_theta > 2.56):
+                                    hElecCentroidREndcap.Fill(centroid_r)
+                                    hElecEOverEPlusHEndcap.Fill(ecal/(ecal+hcal))
                     
     reader.close()
 
